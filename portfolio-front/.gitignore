@@ -1,0 +1,15 @@
+node_modules
+dist
+.vite
+.env
+.env.local
+
+bin
+obj
+
+.vs
+.idea
+*.user
+*.suo
+
+coverage
