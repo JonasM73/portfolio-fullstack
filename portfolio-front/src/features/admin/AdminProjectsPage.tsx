@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { Plus } from "lucide-react";
 
 export default function AdminProjectsPage() {
   return (
@@ -12,7 +13,12 @@ export default function AdminProjectsPage() {
             <h1 className="text-4xl font-bold">
               Dashboard Admin
             </h1>
-
+            <Link to="/admin/projects/new">
+              <Button className="rounded-2xl bg-zinc-900 hover:bg-zinc-800">
+                <Plus className="mr-2 h-4 w-4" />
+                Nouveau projet
+              </Button>
+            </Link>
             <p className="mt-2 text-zinc-500">
               Gestion simple du portfolio.
             </p>
@@ -36,9 +42,11 @@ export default function AdminProjectsPage() {
               vos projets.
             </p>
 
-            <Button className="mt-5 rounded-xl">
-              Gérer les projets
-            </Button>
+            <Link to="/admin/projects/new">
+              <Button className="mt-5 rounded-xl">
+                Ajouter un projet
+              </Button>
+            </Link>
           </Card>
 
           <Card className="rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg">

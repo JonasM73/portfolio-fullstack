@@ -11,6 +11,7 @@ import PrivacyPage from "../features/legal/PrivacyPage";
 
 import AdminLoginPage from "../features/admin/AdminLoginPage";
 import AdminProjectsPage from "../features/admin/AdminProjectsPage";
+import AdminProjectCreatePage from "@/features/admin/AdminProjectCreatePage";
 
 export function AppRouter() {
   return (
@@ -26,7 +27,7 @@ export function AppRouter() {
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/projects" element={<AdminProjectsPage />} />
-
+        <Route path="/admin/projects/new" element={<AdminProjectCreatePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
