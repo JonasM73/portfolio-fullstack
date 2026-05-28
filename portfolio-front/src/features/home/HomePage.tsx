@@ -1,6 +1,7 @@
 import { ArrowRight, Code2, Database, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import ProjectsSection from "../../components/projects/ProjectsSection";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -10,32 +11,24 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#F8F6F2] text-zinc-900">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-violet-500 text-white font-bold shadow-lg">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-violet-500 font-bold text-white shadow-lg">
             JM
           </div>
 
           <div>
-            <h2 className="font-bold text-lg">
-              Jonas Mionnet
-            </h2>
+            <h2 className="text-lg font-bold">Jonas Mionnet</h2>
 
-            <p className="text-sm text-zinc-500">
-              Software Engineer
-            </p>
+            <p className="text-sm text-zinc-500">Software Engineer</p>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           <Link to="/about">
-            <Button variant="ghost">
-              À propos
-            </Button>
+            <Button variant="ghost">À propos</Button>
           </Link>
 
           <Link to="/contact">
-            <Button variant="ghost">
-              Contact
-            </Button>
+            <Button variant="ghost">Contact</Button>
           </Link>
 
           <Link to="/admin/login">
@@ -53,14 +46,13 @@ export default function HomePage() {
           </Badge>
 
           <h1 className="mt-6 text-6xl font-bold leading-tight tracking-tight">
-            Je développe des applications modernes,
-            performantes et intuitives.
+            Je développe des applications modernes, performantes et intuitives.
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-600">
             Étudiant ingénieur informatique en alternance chez Capgemini,
-            passionné par le développement, la data, les architectures
-            modernes et les projets utiles.
+            passionné par le développement, la data, les architectures modernes
+            et les projets utiles.
           </p>
 
           <div className="mt-10 flex gap-4">
@@ -75,11 +67,7 @@ export default function HomePage() {
             </Link>
 
             <Link to="/contact">
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full"
-              >
+              <Button size="lg" variant="outline" className="rounded-full">
                 Me contacter
               </Button>
             </Link>
@@ -113,6 +101,8 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
+
+      <ProjectsSection />
     </main>
   );
 }
@@ -131,13 +121,9 @@ function FeatureCard({
       {icon}
 
       <div>
-        <h3 className="font-semibold">
-          {title}
-        </h3>
+        <h3 className="font-semibold">{title}</h3>
 
-        <p className="text-sm text-zinc-500">
-          {description}
-        </p>
+        <p className="text-sm text-zinc-500">{description}</p>
       </div>
     </div>
   );
