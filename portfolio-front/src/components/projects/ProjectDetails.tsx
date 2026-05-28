@@ -46,8 +46,10 @@ export type Project = {
   country?: string | null;
   githubUrl?: string | null;
   demoUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
-
+ 
 const projectTypeConfig = {
   personnel: { icon: Laptop, label: "Projet personnel" },
   ecole: { icon: GraduationCap, label: "Projet école" },
@@ -79,6 +81,15 @@ function formatPeriod(startDate?: string | null, endDate?: string | null) {
 
   return null;
 }
+function formatCreatedAt(date?: string) {
+  if (!date) return null;
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
+}
 
 export default function ProjectDetails({ project }: { project: Project }) {
   const config = projectTypeConfig[project.projectType] ?? projectTypeConfig.autre;
@@ -88,6 +99,8 @@ export default function ProjectDetails({ project }: { project: Project }) {
   const location = [project.city, project.country].filter(Boolean).join(", ");
   const company = project.companies?.join(", ");
   const school = project.schools?.join(", ");
+  const createdAt = formatCreatedAt(project.createdAt);
+  const updatedAt = formatCreatedAt(project.updatedAt);
 
   const hasTeamSize =
     project.teamSize !== null &&
@@ -104,7 +117,7 @@ export default function ProjectDetails({ project }: { project: Project }) {
     project.documents?.length ? { id: "documents", label: "Documents" } : null,
   ].filter(Boolean) as { id: string; label: string }[];
   const [activeSection, setActiveSection] = useState("top");
-
+ 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -163,7 +176,16 @@ export default function ProjectDetails({ project }: { project: Project }) {
             <Badge className="rounded-full bg-teal-100 px-4 py-2 text-teal-700 hover:bg-teal-100">
               {config.label}
             </Badge>
-
+            {createdAt && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm backdrop-blur">
+                Ajouté le {createdAt}
+              </span>
+            )}
+            {updatedAt && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm backdrop-blur">
+                Modifié le {updatedAt}
+              </span>
+            )}
             {location && (
               <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm backdrop-blur">
                 <MapPin className="h-4 w-4" />

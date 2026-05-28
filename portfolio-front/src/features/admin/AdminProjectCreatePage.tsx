@@ -41,6 +41,8 @@ type ProjectForm = {
   demoUrl: string;
 };
 
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 Mo
+const MAX_DOCUMENT_SIZE = 50 * 1024 * 1024; // 50 Mo
 const API_URL = "https://localhost:7061/api";
 
 export default function AdminProjectCreatePage() {
@@ -51,7 +53,7 @@ export default function AdminProjectCreatePage() {
     goal: "",
     description: "",
     context: "",
-    projectType: "other",
+    projectType: "autre",
     city: "",
     country: "",
     startDate: "",
@@ -112,7 +114,7 @@ export default function AdminProjectCreatePage() {
   ) => {
     setList(list.filter((value) => value !== item));
   };
-
+ 
   const uploadFile = async (file: File) => {
     if (!token) {
       setError("Session expirée. Reconnecte-toi.");

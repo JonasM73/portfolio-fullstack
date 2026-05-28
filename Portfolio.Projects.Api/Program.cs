@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Features;
 using Portfolio.Projects.Api.Endpoints;
 using Portfolio.Projects.Api.Extensions;
 
@@ -8,6 +9,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddProjectServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    // Taille max upload : 100 Mo
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -31,9 +38,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

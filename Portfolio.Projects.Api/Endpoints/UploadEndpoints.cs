@@ -4,7 +4,8 @@ namespace Portfolio.Projects.Api.Endpoints;
 
 public static class UploadEndpoints
 {
-    private const long MaxFileSize = 10 * 1024 * 1024;
+    private const long MaxImageSize = 10 * 1024 * 1024;
+    private const long MaxDocumentSize = 50 * 1024 * 1024;
 
     private static readonly string[] AllowedImageExtensions =
     [
@@ -24,10 +25,7 @@ public static class UploadEndpoints
             HttpContext httpContext) =>
         {
             if (file.Length == 0)
-                return Results.BadRequest("File is empty.");
-
-            if (file.Length > MaxFileSize)
-                return Results.BadRequest("File size must not exceed 10 MB.");
+                return Results.BadRequest("Le fichier est vide.");
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
@@ -37,8 +35,18 @@ public static class UploadEndpoints
             if (!isImage && !isDocument)
             {
                 return Results.BadRequest(
-                    "Invalid file type. Allowed: png, jpg, jpeg, webp, pdf, doc, docx, ppt, pptx."
+                    "Format invalide. Formats autorisés : png, jpg, jpeg, webp, pdf, doc, docx, ppt, pptx."
                 );
+            }
+
+            if (isImage && file.Length > MaxImageSize)
+            {
+                return Results.BadRequest("L'image ne doit pas dépasser 10 Mo.");
+            }
+
+            if (isDocument && file.Length > MaxDocumentSize)
+            {
+                return Results.BadRequest("Le document ne doit pas dépasser 50 Mo.");
             }
 
             var folder = isImage ? "images" : "documents";
@@ -52,8 +60,7 @@ public static class UploadEndpoints
 
             Directory.CreateDirectory(uploadRoot);
 
-            var safeFileName =
-                $"{Guid.NewGuid()}{extension}";
+            var safeFileName = $"{Guid.NewGuid()}{extension}";
 
             var filePath = Path.Combine(uploadRoot, safeFileName);
 

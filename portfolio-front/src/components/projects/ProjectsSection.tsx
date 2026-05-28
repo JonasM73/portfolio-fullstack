@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import ProjectCard from "./ProjectCard";
-import type { Project, ProjectType } from "./ProjectCard";
+import type { Project } from "./ProjectCard";
 
 type ProjectFilter =
   | "Tous"
@@ -48,7 +48,13 @@ export default function ProjectsSection() {
         }
 
         const data: Project[] = await response.json();
-        setProjects(data);
+        setProjects(
+          data.sort(
+            (a, b) =>
+              new Date(b.createdAt ?? "").getTime() -
+              new Date(a.createdAt ?? "").getTime()
+          )
+        );
       } catch (error) {
         console.error(error);
         setProjects([]);

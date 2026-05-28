@@ -28,6 +28,8 @@ export type Project = {
   country?: string | null;
   githubUrl?: string | null;
   demoUrl?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 const projectTypeConfig = {
@@ -48,10 +50,19 @@ const projectTypeConfig = {
     label: "Autre projet",
   },
 };
+function formatCreatedAt(date?: string) {
+  if (!date) return null;
 
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
+}
 export default function ProjectCard({ project }: { project: Project }) {
   const config = projectTypeConfig[project.projectType] ?? projectTypeConfig.autre;
   const Icon = config.icon;
+  const createdAt = formatCreatedAt(project.createdAt);
 
   return (
     <Card className="group overflow-hidden rounded-[2rem] border border-zinc-100 bg-white p-7 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -66,6 +77,12 @@ export default function ProjectCard({ project }: { project: Project }) {
               <Badge className="rounded-full bg-teal-100 px-3 py-1 text-teal-700 hover:bg-teal-100">
                 {config.label}
               </Badge>
+              {createdAt && (
+                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-zinc-500">
+                    Ajouté le {createdAt}
+                  </span>
+                )}
+
 
               {(project.city || project.country) && (
                 <span className="text-sm font-medium text-zinc-400">
@@ -108,9 +125,55 @@ export default function ProjectCard({ project }: { project: Project }) {
 
         <div className="flex shrink-0 flex-wrap gap-3 lg:flex-col lg:items-end">
           <Link to={`/projects/${project.id}`}>
-            <Button className="rounded-full bg-zinc-900 px-5 hover:bg-zinc-800">
-              Voir le détail
-              <ArrowUpRight className="ml-2 h-4 w-4" />
+            <Button     className="
+                group
+                relative
+                overflow-hidden
+                rounded-full
+                bg-zinc-900
+                px-6
+                py-6
+                text-white
+                shadow-md
+                transition-all
+                duration-300
+                hover:-translate-y-0.5
+                hover:scale-[1.02]
+                hover:bg-zinc-950
+                hover:shadow-xl
+                active:scale-[0.98]
+              "
+            >
+              <span
+                className="
+                  absolute
+                  inset-0
+                  bg-gradient-to-r
+                  from-teal-500/0
+                  via-white/10
+                  to-violet-500/0
+                  opacity-0
+                  transition-opacity
+                  duration-500
+                  group-hover:opacity-100
+                "
+              />
+
+              <span className="relative flex items-center">
+                Voir le détail
+
+                <ArrowUpRight
+                  className="
+                    ml-2
+                    h-4
+                    w-4
+                    transition-transform
+                    duration-300
+                    group-hover:translate-x-1
+                    group-hover:-translate-y-1
+                  "
+                />
+              </span>
             </Button>
           </Link>
 
