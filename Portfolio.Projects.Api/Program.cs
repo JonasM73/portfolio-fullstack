@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http.Features;
 using Portfolio.Projects.Api.Endpoints;
 using Portfolio.Projects.Api.Extensions;
+using Portfolio.Projects.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +10,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddProjectServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
-
+builder.Services.AddSingleton<AzureBlobStorageService>();
 builder.Services.Configure<FormOptions>(options =>
 {
     // Taille max upload : 100 Mo
@@ -28,7 +29,6 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

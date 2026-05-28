@@ -134,7 +134,6 @@ export default function AdminProjectCreatePage() {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -144,9 +143,15 @@ export default function AdminProjectCreatePage() {
       } else {
         setDocuments((current) => [...current, response.data]);
       }
-    } catch {
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Upload error:", error.response?.data);
+      } else {
+        console.error(error);
+      }
+
       setError("Impossible d’envoyer le fichier. Vérifie le format et la taille.");
-    } finally {
+    }finally {
       setUploading(false);
     }
   };

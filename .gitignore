@@ -1,40 +1,48 @@
-# =========================
-# React / Node
-# =========================
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Frontend build
 dist/
+**/dist/
 .vite/
-npm-debug.log*
+**/.vite/
+.vite-temp/
+**/.vite-temp/
 
-# =========================
-# Environment variables
-# =========================
-.env
-.env.*
-!.env.example
-
-# =========================
-# .NET
-# =========================
+# .NET build
 bin/
 obj/
+**/bin/
+**/obj/
 
-# =========================
-# Visual Studio / IDE
-# =========================
+# Visual Studio / Rider / VS Code
 .vs/
 .idea/
 .vscode/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
-# =========================
-# OS
-# =========================
+# Secrets / local config
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.*.local.json
+
+# Logs
+*.log
+logs/
+
+# OS files
 .DS_Store
 Thumbs.db
 
-# =========================
-# Logs
-# =========================
-*.log
+# Generated structure files
+structure.txt
+
+# Local docs / notes if private
+Compte.md

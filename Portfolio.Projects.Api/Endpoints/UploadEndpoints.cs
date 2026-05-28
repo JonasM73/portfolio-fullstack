@@ -1,4 +1,5 @@
 using Portfolio.Projects.Api.Models;
+using Portfolio.Projects.Api.Services;
 
 namespace Portfolio.Projects.Api.Endpoints;
 
@@ -21,8 +22,7 @@ public static class UploadEndpoints
     {
         app.MapPost("/api/uploads/projects", async (
             IFormFile file,
-            IWebHostEnvironment env,
-            HttpContext httpContext) =>
+            AzureBlobStorageService blobStorageService) =>
         {
             if (file.Length == 0)
                 return Results.BadRequest("Le fichier est vide.");
@@ -40,37 +40,20 @@ public static class UploadEndpoints
             }
 
             if (isImage && file.Length > MaxImageSize)
-            {
                 return Results.BadRequest("L'image ne doit pas dépasser 10 Mo.");
-            }
 
             if (isDocument && file.Length > MaxDocumentSize)
-            {
                 return Results.BadRequest("Le document ne doit pas dépasser 50 Mo.");
-            }
 
             var folder = isImage ? "images" : "documents";
-
-            var uploadRoot = Path.Combine(
-                env.WebRootPath ?? Path.Combine(env.ContentRootPath, "wwwroot"),
-                "uploads",
-                "projects",
-                folder
-            );
-
-            Directory.CreateDirectory(uploadRoot);
-
             var safeFileName = $"{Guid.NewGuid()}{extension}";
 
-            var filePath = Path.Combine(uploadRoot, safeFileName);
-
-            await using var stream = new FileStream(filePath, FileMode.Create);
-            await file.CopyToAsync(stream);
-
-            var request = httpContext.Request;
-
-            var fileUrl =
-                $"{request.Scheme}://{request.Host}/uploads/projects/{folder}/{safeFileName}";
+            var fileUrl = await blobStorageService.UploadAsync(
+                file,
+                folder,
+                safeFileName,
+                file.ContentType
+            );
 
             var uploadedFile = new ProjectFile
             {
