@@ -1,316 +1,188 @@
-# 🚀 Portfolio - Microservices Architecture with .NET Aspire
+# 🚀 Portfolio – Software Engineer Portfolio Platform
 
-Portfolio personnel moderne développé en architecture **microservices** avec **.NET Aspire**, **ASP.NET Core**, **React**, et une approche orientée **cloud-native**, **maintenabilité** et **scalabilité**.
+![.NET](https://img.shields.io/badge/.NET-9-purple)
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-Green)
+![Azure Blob Storage](https://img.shields.io/badge/Azure-Blob%20Storage-0078D4)
+![JWT](https://img.shields.io/badge/Auth-JWT-black)
 
-L’objectif du projet est de créer un portfolio professionnel moderne, administrable et déployable, permettant de présenter mes projets, compétences et expériences via une architecture logicielle robuste.
+A modern, scalable and production-ready developer portfolio platform built with a **microservices architecture**, designed to showcase projects, technical experiences and professional achievements.
+
+This platform includes a **public portfolio**, an **administration dashboard**, **secure authentication**, **project management**, and **cloud media storage**.
 
 ---
 
-# 📌 État actuel du projet
+# ✨ Features
 
-## ✅ Ce qui a été réalisé
+## 🌍 Public Portfolio
+- Modern landing page
+- Project showcase
+- Detailed project pages
+- Professional profile section
+- Contact page
+- Legal notice & privacy policy
 
-### 1. Initialisation du projet Aspire
+## 📁 Project Management
+- Create projects
+- Edit projects
+- Delete projects
+- Categorization by project type
+- Technologies & roles management
+- Project timeline
+- Image upload
+- Technical document upload
 
-Création du projet principal avec :
+## 🔐 Authentication & Security
+- JWT authentication
+- Protected admin routes
+- Role-based authorization
+- Secure API access
 
-```bash
-dotnet new aspire-starter -n Portfolio
+## ☁️ Cloud Storage
+- Azure Blob Storage integration
+- Image hosting
+- PDF / technical reports hosting
+- Scalable external storage
 
-Cela a généré :
+## ⚡ Developer Experience
+- .NET Aspire orchestration
+- Swagger API documentation
+- Modular architecture
+- Clean folder organization
+- Feature-based frontend structure
 
-Portfolio.AppHost
-Portfolio.ServiceDefaults
-Portfolio.ApiService
-Portfolio.Web
-2. Création de l’architecture microservices
+---
 
-Création des APIs :
+# 🏗️ Architecture
 
-dotnet new webapi -n Portfolio.Profile.Api
-dotnet new webapi -n Portfolio.Projects.Api
-dotnet new webapi -n Portfolio.Contact.Api
-dotnet new webapi -n Portfolio.Gateway
+The application follows a **distributed microservices architecture**.
 
-Ajout dans la solution :
+```txt
+Frontend (React + Vite)
+            │
+            ▼
+      API Gateway
+            │
+ ┌──────────┼──────────┐
+ ▼          ▼          ▼
+Auth     Projects    Profile
+ API        API         API
+ │            │
+ ▼            ▼
+ JWT       MongoDB
+              │
+              ▼
+      Azure Blob Storage
+```
 
-dotnet sln add Portfolio.Profile.Api
-dotnet sln add Portfolio.Projects.Api
-dotnet sln add Portfolio.Contact.Api
-dotnet sln add Portfolio.Gateway
-3. Frontend React moderne
+---
 
-Création du frontend :
+# 🛠️ Tech Stack
 
-npm create vite@latest portfolio-front
+## Frontend
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Shadcn UI
+- Framer Motion
+- Axios
+- React Router
+- Lucide React
 
-Configuration :
+## Backend
+- .NET 9
+- Minimal APIs
+- JWT Authentication
+- Swagger
 
-Framework : React
-Variant  : TypeScript
+## Infrastructure
+- MongoDB
+- Azure Blob Storage
+- .NET Aspire
 
-Installation des dépendances :
+---
 
-npm install axios framer-motion lucide-react
+# 📂 Project Structure
 
-Technologies frontend utilisées :
-
-React
-TypeScript
-Axios
-Framer Motion
-Lucide React
-
-TailwindCSS sera ajouté plus tard.
-
-4. Intégration des microservices dans Aspire
-
-Configuration du Portfolio.AppHost.
-
-Services actuellement orchestrés :
-
-contact-api
-gateway
-profile-api
-projects-api
-webfrontend
-
-Tous les services sont visibles dans le Dashboard Aspire.
-
-5. Configuration Swagger
-
-Suppression de la configuration OpenAPI incompatible.
-
-Remplacement par Swagger classique :
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-Pipeline :
-
-app.UseSwagger();
-app.UseSwaggerUI();
-
-Chaque microservice expose désormais un Swagger.
-
-6. Résolution des problèmes techniques
-Compatibilité framework
-
-Problème rencontré :
-
-net8.0 incompatible avec packages net9.0
-
-Solution :
-
-Migration du projet complet vers :
-
-.NET 9
-Certificat HTTPS Aspire
-
-Problème rencontré :
-
-The remote certificate is invalid
-UntrustedRoot
-
-Solution :
-
-dotnet dev-certs https --clean
-dotnet dev-certs https --trust
-🏗️ Architecture du projet
-
-Architecture microservices actuelle :
-
-Portfolio
+```txt
+Portfolio/
 │
-├── Portfolio.AppHost
-│   └── Orchestration Aspire + Dashboard
+├── portfolio-front/           → React frontend
 │
-├── Portfolio.ServiceDefaults
-│   └── Configuration commune Aspire
+├── Portfolio.Auth.Api/        → Authentication API
+├── Portfolio.Projects.Api/    → Projects management API
+├── Portfolio.Profile.Api/     → Profile management API
+├── Portfolio.Contact.Api/     → Contact API
 │
-├── Portfolio.Gateway
-│   └── API Gateway
-│
-├── Portfolio.Profile.Api
-│   └── Gestion profil utilisateur
-│
-├── Portfolio.Projects.Api
-│   └── Gestion des projets
-│
-├── Portfolio.Contact.Api
-│   └── Gestion contact
-│
-├── Portfolio.Web
-│   └── Frontend Aspire
-│
-└── portfolio-front
-    └── Frontend React moderne
-🌐 Aspire Dashboard
+├── Portfolio.Gateway/         → API Gateway
+├── Portfolio.AppHost/         → Aspire orchestration
+├── Portfolio.ServiceDefaults/ → Shared Aspire configuration
+└── Portfolio.ApiService/      → Shared backend services
+```
 
-Le dashboard Aspire est fonctionnel.
+---
 
-Fonctionnalités disponibles :
+# 📸 Screenshots
 
-Logs
-Monitoring
-Health checks
-Endpoints
-Console
-Traces
-Métriques
+### Home Page
+> Add screenshot here
 
-Dashboard :
+### Projects Page
+> Add screenshot here
 
-https://localhost:17010
-🔗 Endpoints actuels
-Contact API
-https://localhost:7176
-http://localhost:5066
+### Project Details
+> Add screenshot here
 
-Swagger :
+### Admin Dashboard
+> Add screenshot here
 
-https://localhost:7176/swagger
-Gateway
-https://localhost:7287
-http://localhost:5080
+---
 
-Swagger :
+# 🔒 Security
 
-https://localhost:7287/swagger
-Profile API
-https://localhost:7077
-http://localhost:5050
+Sensitive information is **not stored inside the repository**.
 
-Swagger :
+Secrets are handled using:
 
-https://localhost:7077/swagger
-Projects API
-https://localhost:7061
-http://localhost:5107
+- Environment Variables
+- Azure Configuration
+- Local development secrets
 
-Swagger :
+Example:
 
-https://localhost:7061/swagger
-Web Frontend Aspire
-https://localhost:7110
-http://localhost:5278
-🎯 Vision du projet
+```env
+AzureBlobStorage__ConnectionString=
+MongoDb__ConnectionString=
+Jwt__Key=
+```
 
-Le portfolio aura deux modes :
+---
 
-👤 Visiteur
+# 🚀 Roadmap
 
-Le visiteur pourra :
+- [x] Project CRUD
+- [x] JWT authentication
+- [x] Azure Blob Storage
+- [x] Admin dashboard
+- [x] Project details page
+- [ ] Full Docker deployment
+- [ ] CI/CD pipeline
+- [ ] Contact email service
+- [ ] Analytics dashboard
 
-Voir le portfolio
-Consulter les projets
-Voir les compétences
-Voir les expériences
-Télécharger le CV
-Envoyer un message
-🔐 Admin
+---
 
-Un administrateur pourra :
+# 👨‍💻 Author
 
-Se connecter
-Modifier les informations du portfolio
-Ajouter des projets
-Modifier des projets
-Supprimer des projets
-Voir les messages de contact
-🔒 Architecture cible finale
-Portfolio.AppHost
-Portfolio.ServiceDefaults
+**Jonas MIONNET**
 
-Portfolio.Gateway
-Portfolio.Auth.Api
-Portfolio.Profile.Api
-Portfolio.Projects.Api
-Portfolio.Contact.Api
+Software Engineering Student – CESI  
+Cybersecurity & Software Engineering Enthusiast
 
-Portfolio.Web
-portfolio-front
+---
 
-Un nouveau microservice sera ajouté :
+# 📄 License
 
-Portfolio.Auth.Api
-
-Il permettra :
-
-Authentification JWT
-Login Admin
-Protection des routes
-Gestion du rôle Admin
-
-Exemple futur endpoint :
-
-POST /api/auth/login
-🛠️ Technologies utilisées
-Backend
-.NET 9
-ASP.NET Core
-.NET Aspire
-Swagger
-REST APIs
-Microservices
-Frontend
-React
-TypeScript
-Axios
-Framer Motion
-Lucide React
-Infrastructure
-Aspire Dashboard
-Docker (prévu)
-CI/CD (prévu)
-Déploiement Cloud (prévu)
-🚀 Lancement du projet
-Restaurer les packages
-dotnet restore
-Lancer Aspire
-dotnet run --project Portfolio.AppHost
-Ouvrir le dashboard
-https://localhost:17010
-🗺️ Roadmap
-V1
- Architecture Aspire
- Dashboard Aspire
- Swagger
- Microservices
- Front React
- JWT Authentication
- CRUD Profile
- CRUD Projects
- Contact API
-V2
- MongoDB / PostgreSQL
- Dockerisation
- Admin Dashboard
- Analytics visiteurs
- API Gateway avancée
-V3
- Déploiement cloud
- Domaine personnalisé
- SEO
- Multi-langue
- CI/CD
-👨‍💻 Auteur
-
-Jonas Mionnet
-
-Étudiant ingénieur informatique — Alternant chez Capgemini / HCL
-
-Spécialisations :
-
-Développement Web
-Microservices
-Data & BI
-Cybersécurité
-
-Puis fais :
-
-```bash
-git add .
-git commit -m "docs: add project README"
-
-Ça fera déjà un repo très sérieux.
+This project is for educational and portfolio purposes.
