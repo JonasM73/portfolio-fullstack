@@ -32,6 +32,7 @@ obj/
 appsettings.Local.json
 appsettings.*.Local.json
 appsettings.*.local.json
+start-dev.ps1
 
 # Logs
 *.log
