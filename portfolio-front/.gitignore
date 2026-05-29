@@ -1,15 +1,159 @@
-node_modules
-dist
-.vite
+```gitignore
+# =====================================================
+# GLOBAL
+# =====================================================
+
+.DS_Store
+Thumbs.db
+
+*.log
+logs/
+*.tmp
+*.temp
+.cache/
+
+# =====================================================
+# ENVIRONMENTS / SECRETS
+# =====================================================
+
 .env
 .env.local
+.env.development.local
+.env.production.local
+.env.*.local
 
-bin
-obj
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
 
-.vs
-.idea
+*.pfx
+*.pem
+*.key
+*.crt
+
+# =====================================================
+# NODE / REACT / VITE
+# =====================================================
+
+node_modules/
+dist/
+build/
+.vite/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+coverage/
+.nyc_output/
+
+*.tsbuildinfo
+
+# =====================================================
+# .NET / C#
+# =====================================================
+
+bin/
+obj/
+
+TestResults/
+
 *.user
+*.rsuser
 *.suo
+*.userosscache
+*.sln.docstates
 
-coverage
+# NuGet
+packages/
+.nuget/
+
+# Rider / VS / VSCode
+.vs/
+.idea/
+.vscode/
+
+# =====================================================
+# ASPIRE
+# =====================================================
+
+aspire-manifest.json
+*.aspirestate
+
+# =====================================================
+# DATABASES
+# =====================================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+mongodb-data/
+mongo-data/
+
+# =====================================================
+# FILE STORAGE / UPLOADS
+# =====================================================
+
+uploads/
+temp/
+tmp/
+
+wwwroot/uploads/
+
+# Media générés
+*.mp4
+*.mov
+*.avi
+*.zip
+*.rar
+
+# =====================================================
+# AZURE
+# =====================================================
+
+.azure/
+publish/
+
+# =====================================================
+# DOCKER
+# =====================================================
+
+docker-data/
+docker-volumes/
+
+*.tar
+
+# =====================================================
+# TESTS / REPORTS
+# =====================================================
+
+coverage-report/
+playwright-report/
+test-results/
+
+# =====================================================
+# OS GENERATED
+# =====================================================
+
+ehthumbs.db
+Desktop.ini
+
+# =====================================================
+# BACKUPS
+# =====================================================
+
+*.bak
+*.backup
+*.old
+
+# =====================================================
+# LOCK FILES (optionnel)
+# =====================================================
+
+# Si tu travailles seul, tu peux ignorer
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+```
