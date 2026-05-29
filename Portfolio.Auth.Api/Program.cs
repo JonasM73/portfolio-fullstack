@@ -1,12 +1,16 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
+using Portfolio.Auth.Api.Dtos;
+using Portfolio.Auth.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -14,19 +18,50 @@ builder.Services.AddCors(options =>
         policy
             .SetIsOriginAllowed(origin =>
                 origin.StartsWith("http://localhost:") ||
-                origin.StartsWith("https://localhost:")
-            )
+                origin.StartsWith("https://localhost:"))
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
-var adminEmail = builder.Configuration["AdminUser:Email"];
-var adminPassword = builder.Configuration["AdminUser:Password"];
+var mongoConnectionString = builder.Configuration["MongoDb:ConnectionString"];
+var mongoDatabaseName = builder.Configuration["MongoDb:DatabaseName"] ?? "portfolio-db";
+
+if (string.IsNullOrWhiteSpace(mongoConnectionString))
+    throw new InvalidOperationException("MongoDb connection string is missing.");
+
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(mongoConnectionString));
+builder.Services.AddSingleton(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase(mongoDatabaseName);
+});
 
 var jwtKey = builder.Configuration["Jwt:Key"];
-var issuer = builder.Configuration["Jwt:Issuer"];
-var audience = builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+    throw new InvalidOperationException("JWT key is missing.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
@@ -35,42 +70,56 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
-app.MapPost("/api/auth/login", (LoginRequest request) =>
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapPost("/api/auth/login", async (
+    LoginRequest request,
+    AuthService authService) =>
 {
-    if (request.Email != adminEmail || request.Password != adminPassword)
+    var result = await authService.LoginAsync(request);
+
+    return result is null
+        ? Results.Unauthorized()
+        : Results.Ok(result);
+});
+
+ app.MapPost("/api/auth/setup", async (
+    SetupAdminRequest request,
+    AuthService authService) =>
+{
+    var created = await authService.CreateFirstAdminAsync(request);
+
+    if (!created)
     {
-        return Results.Unauthorized();
+        return Results.Conflict(new
+        {
+            message = "Un administrateur existe déjà."
+        });
     }
 
-    var claims = new[]
+    return Results.Created("/api/auth/login", new
     {
-        new Claim(ClaimTypes.Name, "Jonas Mionnet"),
-        new Claim(ClaimTypes.Email, request.Email),
-        new Claim(ClaimTypes.Role, "Admin")
-    };
-
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
-    var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-    var token = new JwtSecurityToken(
-        issuer: issuer,
-        audience: audience,
-        claims: claims,
-        expires: DateTime.UtcNow.AddHours(2),
-        signingCredentials: credentials
-    );
-
-    return Results.Ok(new
-    {
-        token = new JwtSecurityTokenHandler().WriteToken(token),
-        role = "Admin",
-        expiresIn = "2h"
+        message = "Administrateur créé avec succès."
     });
 });
 
-app.Run();
+app.MapGet("/api/auth/me", (ClaimsPrincipal user) =>
+{
+    var email = user.FindFirstValue(ClaimTypes.Email);
+    var fullName = user.FindFirstValue(ClaimTypes.Name);
+    var role = user.FindFirstValue(ClaimTypes.Role);
 
-record LoginRequest(string Email, string Password);
+    return Results.Ok(new MeResponse(
+        email ?? string.Empty,
+        fullName ?? string.Empty,
+        role ?? string.Empty
+    ));
+})
+.RequireAuthorization();
+
+app.Run();
