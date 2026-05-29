@@ -1,12 +1,15 @@
-import { ArrowRight, Code2, Database, Shield } from "lucide-react";
+import { ArrowRight, Code2, Database, Shield, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import ProjectsSection from "../../components/projects/ProjectsSection";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { useAuth } from "../auth/context/AuthContext";
 
 export default function HomePage() {
+  const { isAuthenticated, user, logout } = useAuth();
+
   return (
     <main className="min-h-screen bg-[#F8F6F2] text-zinc-900">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
@@ -17,7 +20,6 @@ export default function HomePage() {
 
           <div>
             <h2 className="text-lg font-bold">Jonas Mionnet</h2>
-
             <p className="text-sm text-zinc-500">Software Engineer</p>
           </div>
         </div>
@@ -31,11 +33,30 @@ export default function HomePage() {
             <Button variant="ghost">Contact</Button>
           </Link>
 
-          <Link to="/admin/login">
-            <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800">
-              Connexion Admin
-            </Button>
-          </Link>
+          {isAuthenticated && user?.role === "Admin" ? (
+            <>
+              <Link to="/admin/projects">
+                <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800">
+                  Dashboard Admin
+                </Button>
+              </Link>
+
+              <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={logout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Déconnexion
+              </Button>
+            </>
+          ) : (
+            <Link to="/admin/login">
+              <Button className="rounded-full bg-zinc-900 hover:bg-zinc-800">
+                Connexion Admin
+              </Button>
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -122,7 +143,6 @@ function FeatureCard({
 
       <div>
         <h3 className="font-semibold">{title}</h3>
-
         <p className="text-sm text-zinc-500">{description}</p>
       </div>
     </div>

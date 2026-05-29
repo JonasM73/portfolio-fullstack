@@ -1,4 +1,9 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 
 import PublicLayout from "../components/layout/PublicLayout";
 
@@ -9,15 +14,28 @@ import ContactPage from "../features/contact/ContactPage";
 import LegalNoticePage from "../features/legal/LegalNoticePage";
 import PrivacyPage from "../features/legal/PrivacyPage";
 
-import AdminLoginPage from "../features/admin/AdminLoginPage";
-import AdminProjectsPage from "../features/admin/AdminProjectsPage";
-import AdminProjectCreatePage from "@/features/admin/AdminProjectCreatePage";
-import ProjectDetailsPage from "@/features/projects/ProjectDetailsPage";
+import ProjectDetailsPage from "../features/projects/ProjectDetailsPage";
+
+import AdminLoginPage from "../features/auth/pages/AdminLoginPage";
+import { ProtectedRoute } from "../features/auth/guards/ProtectedRoute";
+
+import AdminProjectsPage from "../features/admin/pages/AdminProjectsPage";
+import AdminProjectCreatePage from "../features/admin/pages/AdminProjectCreatePage";
+import AdminUsersPage from "../features/admin/pages/AdminUsersPage";
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* AUTH */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+
+        {/* ADMIN */}
+        <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+        <Route path="/admin/projects" element={<ProtectedRoute><AdminProjectsPage /></ProtectedRoute>} />
+        <Route path="/admin/projects/new" element={<ProtectedRoute><AdminProjectCreatePage /></ProtectedRoute>} />
+
+        {/* PUBLIC */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -27,10 +45,7 @@ export function AppRouter() {
           <Route path="/projects/:id" element={<ProjectDetailsPage />} />
         </Route>
 
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin/projects" element={<AdminProjectsPage />} />
-        <Route path="/admin/projects/new" element={<AdminProjectCreatePage />} />
-
+        {/* FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

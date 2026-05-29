@@ -1,39 +1,38 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { Card } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
+import { Card } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const handleLogin = async (
-    e: React.FormEvent
-  ) => {
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        "https://localhost:7296/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+    setError("");
+    setIsSubmitting(true);
 
-      localStorage.setItem(
-        "token",
-        response.data.token
-      );
+    try {
+      await login({
+        email,
+        password,
+      });
 
       navigate("/admin/projects");
-    } catch {
+    } catch (error) {
+      console.error(error);
       setError("Email ou mot de passe incorrect.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -41,32 +40,24 @@ export default function AdminLoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2] px-6">
       <Card className="w-full max-w-md rounded-[2rem] border border-zinc-100 bg-white p-8 shadow-xl">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold">
-            Connexion Admin
-          </h1>
+          <h1 className="text-3xl font-bold">Connexion Admin</h1>
 
           <p className="mt-2 text-zinc-500">
             Accès sécurisé à l’administration.
           </p>
         </div>
 
-        <form
-          onSubmit={handleLogin}
-          className="space-y-5"
-        >
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              Email
-            </label>
+            <label className="mb-2 block text-sm font-medium">Email</label>
 
             <input
               type="email"
               placeholder="Votre email"
               className="w-full rounded-2xl border border-zinc-200 px-4 py-3 outline-none transition focus:border-zinc-900"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -80,23 +71,19 @@ export default function AdminLoginPage() {
               placeholder="Votre mot de passe"
               className="w-full rounded-2xl border border-zinc-200 px-4 py-3 outline-none transition focus:border-zinc-900"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="w-full rounded-2xl bg-zinc-900 py-6 hover:bg-zinc-800"
           >
-            Se connecter
+            {isSubmitting ? "Connexion..." : "Se connecter"}
           </Button>
 
           <Link
