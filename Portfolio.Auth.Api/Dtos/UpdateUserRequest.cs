@@ -1,8 +1,6 @@
 namespace Portfolio.Auth.Api.Dtos;
 
-public record MeResponse(
-    string Id,
-    string Email,
+public record UpdateUserRequest(
     string FullName,
     string Role
 );

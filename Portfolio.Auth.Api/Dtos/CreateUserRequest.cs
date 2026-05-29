@@ -1,8 +1,8 @@
 namespace Portfolio.Auth.Api.Dtos;
 
-public record MeResponse(
-    string Id,
+public record CreateUserRequest(
     string Email,
+    string Password,
     string FullName,
     string Role
 );
