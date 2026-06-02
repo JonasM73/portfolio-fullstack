@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import RichTextEditor from "@/components/ui/RichTextEditror";
 
 type ProjectOption = {
   id: string;
@@ -134,6 +135,13 @@ export default function ContactPage() {
           <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-600">
             N’hésite pas à me contacter, je réponds généralement rapidement.
           </p>
+          <a
+            href="mailto:mionnet.jonas@gmail.com"
+            className="mt-8 inline-flex h-12 items-center gap-2 rounded-2xl bg-zinc-900 px-6 text-sm font-bold text-white transition hover:bg-zinc-800"
+          >
+            Me contacter via Outlook
+            <Mail className="h-4 w-4" />
+          </a>
         </div>
 
         <Card className="rounded-[2rem] border-0 bg-white/75 p-8 shadow-2xl backdrop-blur-xl">
@@ -194,13 +202,15 @@ export default function ContactPage() {
 
             <div className="space-y-2">
               <Label>Message</Label>
-              <textarea
-                name="message"
-                placeholder="Écris ton message..."
+
+              <RichTextEditor
                 value={form.message}
-                onChange={handleChange}
-                className="min-h-36 w-full resize-none rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-teal-400"
-                required
+                onChange={(value) =>
+                  setForm({
+                    ...form,
+                    message: value,
+                  })
+                }
               />
             </div>
 
