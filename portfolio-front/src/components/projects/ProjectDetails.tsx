@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-
+import { Mail } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
@@ -230,6 +230,18 @@ export default function ProjectDetails({ project }: { project: Project }) {
                 </Button>
               </a>
             )}
+
+            <Link
+              to={`/contact?projectId=${project.id}&projectTitle=${encodeURIComponent(project.title)}`}
+            >
+              <Button
+                variant="outline"
+                className="rounded-full border-zinc-300 bg-white/60 px-7 py-6 text-base backdrop-blur hover:bg-white"
+              >
+                Me contacter pour ce projet
+                <Mail className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </section>

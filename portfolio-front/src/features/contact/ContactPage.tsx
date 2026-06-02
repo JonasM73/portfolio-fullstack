@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Mail, Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,60 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+type ProjectOption = {
+  id: string;
+  title: string;
+};
+
 export default function ContactPage() {
+  const [searchParams] = useSearchParams();
+
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
+    projectId: "",
+    projectTitle: "",
   });
 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const response = await axios.get("https://localhost:7061/api/projects");
+
+        setProjects(
+          response.data.map((project: any) => ({
+            id: project.id,
+            title: project.title,
+          }))
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    const projectId = searchParams.get("projectId");
+    const projectTitle = searchParams.get("projectTitle");
+
+    if (projectId && projectTitle) {
+      setForm((current) => ({
+        ...current,
+        projectId,
+        projectTitle,
+        subject: `À propos du projet : ${projectTitle}`,
+      }));
+    }
+  }, [searchParams]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -25,6 +69,16 @@ export default function ContactPage() {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedProject = projects.find((project) => project.id === e.target.value);
+
+    setForm({
+      ...form,
+      projectId: selectedProject?.id ?? "",
+      projectTitle: selectedProject?.title ?? "",
     });
   };
 
@@ -42,8 +96,11 @@ export default function ContactPage() {
         email: "",
         subject: "",
         message: "",
+        projectId: "",
+        projectTitle: "",
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
       setError("Impossible d’envoyer le message pour le moment.");
     }
   };
@@ -76,7 +133,7 @@ export default function ContactPage() {
 
           <p className="mt-6 max-w-xl text-lg leading-8 text-zinc-600">
             N’hésite pas à me contacter, je réponds généralement rapidement.
-        </p>
+          </p>
         </div>
 
         <Card className="rounded-[2rem] border-0 bg-white/75 p-8 shadow-2xl backdrop-blur-xl">
@@ -116,6 +173,23 @@ export default function ContactPage() {
                 className="h-12 rounded-2xl bg-white"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Projet concerné optionnel</Label>
+              <select
+                value={form.projectId}
+                onChange={handleProjectChange}
+                className="h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm outline-none focus:ring-2 focus:ring-teal-400"
+              >
+                <option value="">Aucun projet sélectionné</option>
+
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.title}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">

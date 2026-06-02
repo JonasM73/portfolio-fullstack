@@ -65,6 +65,8 @@ app.MapPost("/api/contact", async (
         Email = request.Email,
         Subject = request.Subject,
         Message = request.Message,
+        ProjectId = request.ProjectId,
+        ProjectTitle = request.ProjectTitle,
         CreatedAt = DateTime.UtcNow
     };
 
@@ -73,6 +75,10 @@ app.MapPost("/api/contact", async (
     var from = configuration["Resend:From"]!;
     var to = configuration["Resend:To"]!;
 
+    var projectLabel = string.IsNullOrWhiteSpace(message.ProjectTitle)
+        ? "Aucun projet sélectionné"
+        : message.ProjectTitle;
+
     var email = new EmailMessage
     {
         From = from,
@@ -80,15 +86,25 @@ app.MapPost("/api/contact", async (
         Subject = $"Portfolio - Nouveau message : {message.Subject}",
         HtmlBody = $"""
             <h2>Nouveau message depuis le portfolio</h2>
+
             <p><strong>Nom :</strong> {message.Name}</p>
             <p><strong>Email :</strong> {message.Email}</p>
             <p><strong>Sujet :</strong> {message.Subject}</p>
+            <p><strong>Projet concerné :</strong> {projectLabel}</p>
+
             <p><strong>Message :</strong></p>
             <p>{message.Message}</p>
             """
     };
 
-    await resend.EmailSendAsync(email);
+    try
+    {
+        await resend.EmailSendAsync(email);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erreur Resend : {ex.Message}");
+    }
 
     return Results.Created($"/api/contact/{message.Id}", new
     {
@@ -97,6 +113,8 @@ app.MapPost("/api/contact", async (
         message.Email,
         message.Subject,
         message.Message,
+        message.ProjectId,
+        message.ProjectTitle,
         message.CreatedAt
     });
 });
@@ -116,6 +134,8 @@ app.MapGet("/api/contact/messages", async (
         message.Email,
         message.Subject,
         message.Message,
+        message.ProjectId,
+        message.ProjectTitle,
         message.CreatedAt
     });
 
