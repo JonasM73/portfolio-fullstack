@@ -19,7 +19,7 @@ public class AzureBlobStorageService
             throw new InvalidOperationException("Azure Blob Storage container name is missing.");
 
         _containerClient = new BlobContainerClient(connectionString, containerName);
-        _containerClient.CreateIfNotExists(PublicAccessType.Blob);
+        _containerClient.CreateIfNotExists();
     }
 
     public async Task<string> UploadAsync(

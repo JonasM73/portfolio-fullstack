@@ -267,15 +267,34 @@ export default function ProjectDetails({ project }: { project: Project }) {
       )}
 
       {project.context && (
-        <ScrollSection
-          id="contexte"
-          eyebrow="Contexte"
-          title="Le cadre dans lequel le projet a été réalisé."
-          align="right"
-        >
-          {project.context}
-        </ScrollSection>
-      )}
+      <section
+        id="contexte"
+        className="mx-auto max-w-6xl px-8 py-28"
+      >
+        <div className="overflow-hidden rounded-[2.5rem] border border-zinc-200/70 bg-white shadow-[0_20px_80px_rgba(0,0,0,0.06)]">
+          <div className="border-b border-zinc-100 px-8 py-8 md:px-12">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-teal-600">
+              Contexte
+            </p>
+
+            <h2 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-zinc-900 md:text-5xl">
+              Le cadre dans lequel le projet a été réalisé.
+            </h2>
+          </div>
+
+          <div className="px-8 py-10 md:px-12 md:py-12">
+            <div className="max-w-4xl space-y-6 text-lg leading-9 text-zinc-600">
+              {project.context
+                .split("\n")
+                .filter(Boolean)
+                .map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
 
       {project.roles && project.roles.length > 0 && (
         <RolesSection roles={project.roles} />
