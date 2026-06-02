@@ -179,7 +179,13 @@ public class AuthService
 
         return (true, "Compte supprimé avec succès.");
     }
-
+    public async Task<AppUser?> GetUserByEmailAsync(
+        string email)
+    {
+        return await _users
+            .Find(x => x.Email == email)
+            .FirstOrDefaultAsync();
+    }
     public async Task<(bool Success, string Message)> ChangePasswordAsync(
         string userId,
         ChangePasswordRequest request)

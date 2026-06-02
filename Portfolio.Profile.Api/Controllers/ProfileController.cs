@@ -16,6 +16,26 @@ public class ProfileController : ControllerBase
     {
         _profileService = profileService;
     }
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateProfile(CreateProfileRequest request)
+    {
+        var profile = await _profileService.CreateEmptyProfileAsync(
+            request.AuthUserId,
+            request.Email
+        );
+
+        return Ok(profile);
+    }
+    [HttpDelete("{authUserId}")]
+public async Task<IActionResult> DeleteProfile(string authUserId)
+{
+    var deleted = await _profileService.DeleteByAuthUserIdAsync(authUserId);
+
+    if (!deleted)
+        return NotFound(new { message = "Profil introuvable." });
+
+    return Ok(new { message = "Profil supprimé." });
+}
 
     [HttpGet("public")]
     public async Task<IActionResult> GetPublicProfile()
@@ -61,4 +81,5 @@ public class ProfileController : ControllerBase
 
         return Ok(profile);
     }
+    
 }

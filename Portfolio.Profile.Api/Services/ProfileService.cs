@@ -53,7 +53,12 @@ public class ProfileService
 
         return profile;
     }
+public async Task<bool> DeleteByAuthUserIdAsync(string authUserId)
+{
+    var result = await _profiles.DeleteOneAsync(p => p.AuthUserId == authUserId);
 
+    return result.DeletedCount > 0;
+}
     public async Task<UserProfile?> UpdateAsync(string authUserId, UpdateProfileRequest request)
     {
         var profile = await GetByAuthUserIdAsync(authUserId);

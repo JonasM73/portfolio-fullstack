@@ -107,7 +107,14 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<PasswordPolicyService>();
 builder.Services.AddScoped<AuthService>();
-
+builder.Services.AddScoped<ProfileClient>();
+builder.Services.AddHttpClient(
+    "ProfileApi",
+    client =>
+    {
+        client.BaseAddress =
+            new Uri("https://localhost:7077");
+    });
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -124,13 +131,37 @@ app.UseAuthorization();
 
 app.MapPost("/api/auth/setup", async (
     SetupAdminRequest request,
-    AuthService authService) =>
+    AuthService authService,
+    ProfileClient profileClient) =>
 {
-    var result = await authService.CreateFirstAdminAsync(request);
+    var result =
+        await authService.CreateFirstAdminAsync(request);
 
-    return result.Success
-        ? Results.Ok(new { message = result.Message })
-        : Results.Conflict(new { message = result.Message });
+    if (!result.Success)
+    {
+        return Results.Conflict(new
+        {
+            message = result.Message
+        });
+    }
+
+    var admin =
+        await authService.GetUserByEmailAsync(
+            request.Email
+        );
+
+    if (admin is not null)
+    {
+        await profileClient.CreateProfileAsync(
+            admin.Id.ToString(),
+            admin.Email
+        );
+    }
+
+    return Results.Ok(new
+    {
+        message = result.Message
+    });
 });
 
 app.MapPost("/api/auth/login", async (
@@ -199,13 +230,37 @@ app.MapGet("/api/auth/users/{id}", async (
 
 app.MapPost("/api/auth/users", async (
     CreateUserRequest request,
-    AuthService authService) =>
+    AuthService authService,
+    ProfileClient profileClient) =>
 {
-    var result = await authService.CreateUserAsync(request);
+    var result =
+        await authService.CreateUserAsync(request);
 
-    return result.Success
-        ? Results.Ok(new { message = result.Message })
-        : Results.BadRequest(new { message = result.Message });
+    if (!result.Success)
+    {
+        return Results.BadRequest(new
+        {
+            message = result.Message
+        });
+    }
+
+    var user =
+        await authService.GetUserByEmailAsync(
+            request.Email
+        );
+
+    if (user is not null)
+    {
+        await profileClient.CreateProfileAsync(
+            user.Id.ToString(),
+            user.Email
+        );
+    }
+
+    return Results.Ok(new
+    {
+        message = result.Message
+    });
 })
 .RequireAuthorization("RequireAdmin");
 
@@ -224,15 +279,28 @@ app.MapPut("/api/auth/users/{id}", async (
 
 app.MapDelete("/api/auth/users/{id}", async (
     string id,
-    AuthService authService) =>
+    AuthService authService,
+    ProfileClient profileClient) =>
 {
+    await profileClient.DeleteProfileAsync(id);
+
     var result = await authService.DeleteUserAsync(id);
 
-    return result.Success
-        ? Results.Ok(new { message = result.Message })
-        : Results.BadRequest(new { message = result.Message });
+    if (!result.Success)
+    {
+        return Results.NotFound(new
+        {
+            message = result.Message
+        });
+    }
+
+    return Results.Ok(new
+    {
+        message = result.Message
+    });
 })
 .RequireAuthorization("RequireAdmin");
+
 
 app.MapPut("/api/auth/change-password", async (
     ChangePasswordRequest request,

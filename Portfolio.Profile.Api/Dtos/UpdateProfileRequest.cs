@@ -39,3 +39,9 @@ public class TimelineItemDto
     public string Text { get; set; } = string.Empty;
     public bool IsCurrent { get; set; }
 }
+
+public class CreateProfileRequest
+{
+    public string AuthUserId { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
