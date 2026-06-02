@@ -23,13 +23,15 @@ public class ProjectCreateRequest
     public string ProjectType { get; set; } = "other";
 
     public string[] Schools { get; set; } = [];
-
     public string[] Companies { get; set; } = [];
 
     public string? City { get; set; }
-
     public string? Country { get; set; }
 
     public string? GithubUrl { get; set; }
     public string? DemoUrl { get; set; }
+
+    public bool IsPublished { get; set; } = false;
+    public bool IsFeatured { get; set; } = false;
+    public int DisplayOrder { get; set; } = 999;
 }

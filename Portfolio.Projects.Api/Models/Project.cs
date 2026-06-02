@@ -62,6 +62,15 @@ public class Project
     [BsonElement("demoUrl")]
     public string? DemoUrl { get; set; }
 
+    [BsonElement("isPublished")]
+    public bool IsPublished { get; set; } = false;
+
+    [BsonElement("isFeatured")]
+    public bool IsFeatured { get; set; } = false;
+
+    [BsonElement("displayOrder")]
+    public int DisplayOrder { get; set; } = 999;
+
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -19,12 +19,10 @@ import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 
 import { projectService } from "../services/projectService";
-import type {
-  ProjectFile,
-  ProjectForm,
-} from "../types/project.types";
+import type { Project, ProjectFile, ProjectForm } from "../types/project.types";
 
-export default function AdminProjectCreatePage() {
+export default function AdminProjectEditPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [form, setForm] = useState<ProjectForm>({
@@ -58,16 +56,62 @@ export default function AdminProjectCreatePage() {
   const [images, setImages] = useState<ProjectFile[]>([]);
   const [documents, setDocuments] = useState<ProjectFile[]>([]);
 
+  const [isLoadingProject, setIsLoadingProject] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
 
+  useEffect(() => {
+    async function loadProject() {
+      if (!id || !token) {
+        setError("Projet introuvable ou session expirée.");
+        setIsLoadingProject(false);
+        return;
+      }
+
+      try {
+        const response = await projectService.getProjectById(id, token);
+        const project: Project = response.data;
+
+        setForm({
+          title: project.title ?? "",
+          goal: project.goal ?? "",
+          description: project.description ?? "",
+          context: project.context ?? "",
+          projectType: project.projectType ?? "autre",
+          city: project.city ?? "",
+          country: project.country ?? "",
+          startDate: toInputDate(project.startDate),
+          endDate: toInputDate(project.endDate),
+          teamSize: project.teamSize ? String(project.teamSize) : "",
+          githubUrl: project.githubUrl ?? "",
+          demoUrl: project.demoUrl ?? "",
+          isPublished: project.isPublished ?? false,
+          isFeatured: project.isFeatured ?? false,
+          displayOrder: String(project.displayOrder ?? 999),
+        });
+
+        setTechnologies(project.technologies ?? []);
+        setRoles(project.roles ?? []);
+        setSchools(project.schools ?? []);
+        setCompanies(project.companies ?? []);
+        setImages(project.images ?? []);
+        setDocuments(project.documents ?? []);
+      } catch (error) {
+        console.error(error);
+        setError("Impossible de charger le projet.");
+      } finally {
+        setIsLoadingProject(false);
+      }
+    }
+
+    loadProject();
+  }, [id, token]);
+
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({
       ...form,
@@ -107,8 +151,7 @@ export default function AdminProjectCreatePage() {
     setError("");
 
     try {
-      const response =
-        await projectService.uploadProjectFile(token, file);
+      const response = await projectService.uploadProjectFile(token, file);
 
       if (response.data.fileType === "image") {
         setImages((current) => [...current, response.data]);
@@ -117,15 +160,13 @@ export default function AdminProjectCreatePage() {
       }
     } catch (error) {
       console.error(error);
-      setError("Impossible d’envoyer le fichier. Vérifie le format et la taille.");
+      setError("Impossible d’envoyer le fichier.");
     } finally {
       setUploading(false);
     }
   };
 
-  const handleFilesChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
 
     for (const file of files) {
@@ -153,8 +194,8 @@ export default function AdminProjectCreatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!token) {
-      setError("Session expirée. Reconnecte-toi.");
+    if (!id || !token) {
+      setError("Projet introuvable ou session expirée.");
       return;
     }
 
@@ -162,7 +203,7 @@ export default function AdminProjectCreatePage() {
     setError("");
 
     try {
-      await projectService.createProject(token, {
+      await projectService.updateProject(id, token, {
         title: form.title,
         description: form.description,
         goal: form.goal || null,
@@ -189,11 +230,22 @@ export default function AdminProjectCreatePage() {
       navigate("/admin/projects");
     } catch (error) {
       console.error(error);
-      setError("Impossible d’ajouter le projet.");
+      setError("Impossible de modifier le projet.");
     } finally {
       setLoading(false);
     }
   };
+
+  if (isLoadingProject) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2]">
+        <div className="flex items-center gap-3 text-zinc-500">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Chargement du projet...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#F8F6F2] px-6 py-8 text-zinc-900">
@@ -205,16 +257,16 @@ export default function AdminProjectCreatePage() {
               className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour à l’espace admin
+              Retour aux projets
             </Link>
 
             <h1 className="text-4xl font-bold tracking-tight">
-              Ajouter un nouveau projet
+              Modifier le projet
             </h1>
 
             <p className="mt-3 max-w-2xl text-zinc-500">
-              Crée une fiche projet complète avec objectifs, contexte,
-              technologies, rôles, images et documents.
+              Mets à jour les informations, les médias, la visibilité et l’ordre
+              d’affichage du projet.
             </p>
           </div>
 
@@ -222,16 +274,11 @@ export default function AdminProjectCreatePage() {
             <p className="text-sm font-semibold text-zinc-500">
               Durée estimée
             </p>
-            <p className="mt-1 text-xl font-bold">
-              {getDurationLabel()}
-            </p>
+            <p className="mt-1 text-xl font-bold">{getDurationLabel()}</p>
           </Card>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid gap-8 lg:grid-cols-[1fr_360px]"
-        >
+        <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1fr_360px]">
           <div className="space-y-8">
             <SectionCard
               title="Informations essentielles"
@@ -377,9 +424,7 @@ export default function AdminProjectCreatePage() {
                       setCompanyInput("")
                     )
                   }
-                  onRemove={(item) =>
-                    removeItem(item, companies, setCompanies)
-                  }
+                  onRemove={(item) => removeItem(item, companies, setCompanies)}
                 />
               </div>
             </SectionCard>
@@ -533,12 +578,12 @@ export default function AdminProjectCreatePage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Création...
+                    Mise à jour...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Ajouter le projet
+                    Enregistrer les modifications
                   </>
                 )}
               </Button>
@@ -547,9 +592,7 @@ export default function AdminProjectCreatePage() {
 
           <aside>
             <Card className="sticky top-8 rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg">
-              <p className="text-sm font-bold text-teal-600">
-                Aperçu rapide
-              </p>
+              <p className="text-sm font-bold text-teal-600">Aperçu rapide</p>
 
               <h2 className="mt-3 text-2xl font-bold leading-tight">
                 {form.title || "Titre du projet"}
@@ -597,16 +640,6 @@ export default function AdminProjectCreatePage() {
                 </p>
 
                 <p>
-                  <strong className="text-zinc-900">Écoles :</strong>{" "}
-                  {schools.length || 0}
-                </p>
-
-                <p>
-                  <strong className="text-zinc-900">Entreprises :</strong>{" "}
-                  {companies.length || 0}
-                </p>
-
-                <p>
                   <strong className="text-zinc-900">Fichiers :</strong>{" "}
                   {images.length} image(s), {documents.length} document(s)
                 </p>
@@ -617,6 +650,11 @@ export default function AdminProjectCreatePage() {
       </div>
     </main>
   );
+}
+
+function toInputDate(value?: string) {
+  if (!value) return "";
+  return value.split("T")[0];
 }
 
 function SectionCard({

@@ -14,32 +14,103 @@ public class ProjectService
         _collection = collection;
     }
 
-    public async Task<List<Project>> GetAllAsync()
+    public async Task<List<Project>>
+    GetPublishedAsync()
+    {
+        return await _collection
+            .Find(p => p.IsPublished)
+            .SortBy(p => p.DisplayOrder)
+            .ToListAsync();
+    }
+
+    public async Task<List<Project>>
+    GetAllAdminAsync()
     {
         return await _collection
             .Find(_ => true)
-            .SortByDescending(p => p.CreatedAt)
+            .SortBy(p => p.DisplayOrder)
             .ToListAsync();
     }
 
     public async Task<Project?> GetByIdAsync(string id)
     {
         if (!ObjectId.TryParse(id, out var objectId))
-        {
             return null;
-        }
 
         return await _collection
             .Find(p => p.Id == objectId)
             .FirstOrDefaultAsync();
     }
+    public async Task<bool>
+    TogglePublishAsync(
+        string id,
+        bool value)
+    {
+        if (!ObjectId.TryParse(
+            id,
+            out var objectId))
+        {
+            return false;
+        }
 
+        var update =
+            Builders<Project>.Update
+                .Set(
+                    p => p.IsPublished,
+                    value
+                )
+                .Set(
+                    p => p.UpdatedAt,
+                    DateTime.UtcNow
+                );
+
+        var result =
+            await _collection.UpdateOneAsync(
+                p => p.Id == objectId,
+                update
+            );
+
+        return result.ModifiedCount > 0;
+    }
+    public async Task<bool>
+    ToggleFeaturedAsync(
+        string id,
+        bool value)
+    {
+        if (!ObjectId.TryParse(
+            id,
+            out var objectId))
+        {
+            return false;
+        }
+
+        var update =
+            Builders<Project>.Update
+                .Set(
+                    p => p.IsFeatured,
+                    value
+                )
+                .Set(
+                    p => p.UpdatedAt,
+                    DateTime.UtcNow
+                );
+
+        var result =
+            await _collection.UpdateOneAsync(
+                p => p.Id == objectId,
+                update
+            );
+
+        return result.ModifiedCount > 0;
+    }
     public async Task<Project> CreateAsync(ProjectCreateRequest request)
     {
+        Validate(request.Title, request.Description);
+
         var project = new Project
         {
-            Title = request.Title,
-            Description = request.Description,
+            Title = request.Title.Trim(),
+            Description = request.Description.Trim(),
             Goal = request.Goal,
             Context = request.Context,
             Technologies = request.Technologies,
@@ -56,6 +127,9 @@ public class ProjectService
             Country = request.Country,
             GithubUrl = request.GithubUrl,
             DemoUrl = request.DemoUrl,
+            IsPublished = request.IsPublished,
+            IsFeatured = request.IsFeatured,
+            DisplayOrder = request.DisplayOrder,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -65,14 +139,12 @@ public class ProjectService
         return project;
     }
 
-    public async Task<bool> UpdateAsync(
-        string id,
-        ProjectUpdateRequest request)
+    public async Task<bool> UpdateAsync(string id, ProjectUpdateRequest request)
     {
+        Validate(request.Title, request.Description);
+
         if (!ObjectId.TryParse(id, out var objectId))
-        {
             return false;
-        }
 
         var update = Builders<Project>.Update
             .Set(p => p.Title, request.Title)
@@ -93,6 +165,9 @@ public class ProjectService
             .Set(p => p.TeamSize, request.TeamSize)
             .Set(p => p.GithubUrl, request.GithubUrl)
             .Set(p => p.DemoUrl, request.DemoUrl)
+            .Set(p => p.IsPublished, request.IsPublished)
+            .Set(p => p.IsFeatured, request.IsFeatured)
+            .Set(p => p.DisplayOrder, request.DisplayOrder)
             .Set(p => p.UpdatedAt, DateTime.UtcNow);
 
         var result = await _collection.UpdateOneAsync(
@@ -106,14 +181,26 @@ public class ProjectService
     public async Task<bool> DeleteAsync(string id)
     {
         if (!ObjectId.TryParse(id, out var objectId))
-        {
             return false;
-        }
 
         var result = await _collection.DeleteOneAsync(
             p => p.Id == objectId
         );
 
         return result.DeletedCount > 0;
+    }
+
+    private static void Validate(
+        string title,
+        string description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Le titre est obligatoire.");
+
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("La description est obligatoire.");
+
+        if (title.Length > 120)
+            throw new ArgumentException("Titre trop long.");
     }
 }

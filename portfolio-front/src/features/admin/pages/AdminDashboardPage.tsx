@@ -6,7 +6,7 @@ import { useAuth } from "../../auth/context/AuthContext";
 import { Button } from "../../../components/ui/button";
 import { Card } from "../../../components/ui/card";
 
-export default function AdminProjectsPage() {
+export default function AdminDashboardPage() {
   const { logout, user } = useAuth();
 
   return (
@@ -45,10 +45,9 @@ export default function AdminProjectsPage() {
               Ajouter, modifier ou supprimer vos projets.
             </p>
 
-            <Link to="/admin/projects/new">
+            <Link to="/admin/projects/page">
               <Button className="mt-5 rounded-xl">
-                <Plus className="mr-2 h-4 w-4" />
-                Ajouter un projet
+                Voir les projets
               </Button>
             </Link>
           </Card>
