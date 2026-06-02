@@ -45,34 +45,49 @@ export default function RichTextEditor({ value, onChange }: Props) {
     editorProps: {
       attributes: {
         class:
-          "min-h-48 rounded-b-2xl bg-white px-4 py-4 text-sm outline-none [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1",
+          "min-h-56 bg-transparent px-5 py-5 text-sm leading-7 text-zinc-800 outline-none placeholder:text-zinc-400 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_p]:mb-2",
       },
     },
   });
 
   if (!editor) return null;
 
-  const btn =
-    "flex h-9 w-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900";
+  const buttonClass = (isActive = false) =>
+    `group flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 ${
+      isActive
+        ? "bg-zinc-900 text-white shadow-sm"
+        : "text-zinc-500 hover:bg-white hover:text-zinc-900 hover:shadow-sm"
+    }`;
 
-  const active = "bg-zinc-200 text-zinc-900";
+  const separator = <div className="mx-1 h-6 w-px bg-zinc-200" />;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm focus-within:ring-2 focus-within:ring-teal-400">
-      <div className="flex flex-wrap items-center gap-1 border-b border-zinc-200 bg-zinc-50 px-3 py-2">
-        <button type="button" className={btn} onClick={() => editor.chain().focus().undo().run()}>
+    <div className="overflow-hidden rounded-[1.4rem] border border-zinc-200/80 bg-white shadow-sm transition-all duration-300 focus-within:border-teal-400 focus-within:shadow-lg focus-within:shadow-teal-500/10">
+      <div className="flex flex-wrap items-center gap-1 border-b border-zinc-200/80 bg-gradient-to-r from-zinc-50 to-white px-3 py-2">
+        <button
+          type="button"
+          title="Annuler"
+          className={buttonClass()}
+          onClick={() => editor.chain().focus().undo().run()}
+        >
           <Undo className="h-4 w-4" />
         </button>
 
-        <button type="button" className={btn} onClick={() => editor.chain().focus().redo().run()}>
+        <button
+          type="button"
+          title="Rétablir"
+          className={buttonClass()}
+          onClick={() => editor.chain().focus().redo().run()}
+        >
           <Redo className="h-4 w-4" />
         </button>
 
-        <div className="mx-2 h-6 w-px bg-zinc-300" />
+        {separator}
 
         <button
           type="button"
-          className={`${btn} ${editor.isActive("bold") ? active : ""}`}
+          title="Gras"
+          className={buttonClass(editor.isActive("bold"))}
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
           <Bold className="h-4 w-4" />
@@ -80,7 +95,8 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
         <button
           type="button"
-          className={`${btn} ${editor.isActive("italic") ? active : ""}`}
+          title="Italique"
+          className={buttonClass(editor.isActive("italic"))}
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
           <Italic className="h-4 w-4" />
@@ -88,17 +104,19 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
         <button
           type="button"
-          className={`${btn} ${editor.isActive("underline") ? active : ""}`}
+          title="Souligné"
+          className={buttonClass(editor.isActive("underline"))}
           onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
           <UnderlineIcon className="h-4 w-4" />
         </button>
 
-        <div className="mx-2 h-6 w-px bg-zinc-300" />
+        {separator}
 
         <button
           type="button"
-          className={`${btn} ${editor.isActive("bulletList") ? active : ""}`}
+          title="Liste à puces"
+          className={buttonClass(editor.isActive("bulletList"))}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
           <List className="h-4 w-4" />
@@ -106,23 +124,39 @@ export default function RichTextEditor({ value, onChange }: Props) {
 
         <button
           type="button"
-          className={`${btn} ${editor.isActive("orderedList") ? active : ""}`}
+          title="Liste numérotée"
+          className={buttonClass(editor.isActive("orderedList"))}
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered className="h-4 w-4" />
         </button>
 
-        <div className="mx-2 h-6 w-px bg-zinc-300" />
+        {separator}
 
-        <button type="button" className={btn} onClick={() => editor.chain().focus().setTextAlign("left").run()}>
+        <button
+          type="button"
+          title="Aligner à gauche"
+          className={buttonClass(editor.isActive({ textAlign: "left" }))}
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+        >
           <AlignLeft className="h-4 w-4" />
         </button>
 
-        <button type="button" className={btn} onClick={() => editor.chain().focus().setTextAlign("center").run()}>
+        <button
+          type="button"
+          title="Centrer"
+          className={buttonClass(editor.isActive({ textAlign: "center" }))}
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+        >
           <AlignCenter className="h-4 w-4" />
         </button>
 
-        <button type="button" className={btn} onClick={() => editor.chain().focus().setTextAlign("right").run()}>
+        <button
+          type="button"
+          title="Aligner à droite"
+          className={buttonClass(editor.isActive({ textAlign: "right" }))}
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+        >
           <AlignRight className="h-4 w-4" />
         </button>
       </div>
