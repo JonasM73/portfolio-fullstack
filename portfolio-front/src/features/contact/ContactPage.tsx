@@ -139,10 +139,10 @@ export default function ContactPage() {
         <Card className="rounded-[2rem] border-0 bg-white/75 p-8 shadow-2xl backdrop-blur-xl">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label>Nom</Label>
+              <Label>Nom / prénom</Label>
               <Input
                 name="name"
-                placeholder="Ton nom"
+                placeholder="ex : Jonas Mionnet"
                 value={form.name}
                 onChange={handleChange}
                 className="h-12 rounded-2xl bg-white"
@@ -155,7 +155,7 @@ export default function ContactPage() {
               <Input
                 name="email"
                 type="email"
-                placeholder="ton@email.com"
+                placeholder="ex : nom.prenom@email.com"
                 value={form.email}
                 onChange={handleChange}
                 className="h-12 rounded-2xl bg-white"
@@ -167,7 +167,7 @@ export default function ContactPage() {
               <Label>Sujet</Label>
               <Input
                 name="subject"
-                placeholder="Sujet du message"
+                placeholder="ex : Demande de collaboration"
                 value={form.subject}
                 onChange={handleChange}
                 className="h-12 rounded-2xl bg-white"
