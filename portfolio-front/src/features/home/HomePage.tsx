@@ -278,9 +278,7 @@ export default function HomePage() {
                 Un projet, une idée ou une opportunité ?
               </h2>
 
-              <p className="mt-4 max-w-2xl text-white/60">
-                {profile.bio}
-              </p>
+
             </div>
 
             <Link to="/contact">
