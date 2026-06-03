@@ -25,7 +25,8 @@ import AdminProjectCreatePage from "../features/admin/pages/project/AdminProject
 import AdminUsersPage from "../features/admin/pages/AdminUsersPage";
 import AdminProjectEditPage from "../features/admin/pages/project/AdminProjectEditPage";
 import AdminProfilePage from "../features/admin/pages/AdminProfilePage";
-
+import ForgotPasswordPage from "../features/auth/pages/ForgotPasswordPage";
+import ResetPasswordPage from "../features/auth/pages/ResetPasswordPage";
 
 export function AppRouter() {
   return (
@@ -41,6 +42,8 @@ export function AppRouter() {
         <Route path="/admin/projects/page" element={<ProtectedRoute><AdminProjectPage /></ProtectedRoute>} />
         <Route path="/admin/projects/new" element={<ProtectedRoute><AdminProjectCreatePage /></ProtectedRoute>} />
         <Route path="/admin/projects/:id/edit" element={<ProtectedRoute><AdminProjectEditPage /></ProtectedRoute>} />
+        <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/admin/reset-password" element={<ResetPasswordPage />} />
         {/* PUBLIC */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<HomePage />} />

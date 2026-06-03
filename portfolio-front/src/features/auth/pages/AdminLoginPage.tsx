@@ -74,6 +74,12 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+        <Link
+          to="/admin/forgot-password"
+          className="block text-right text-sm font-semibold text-zinc-500 hover:text-zinc-900"
+        >
+          Mot de passe oublié ?
+        </Link>
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -94,6 +100,7 @@ export default function AdminLoginPage() {
           </Link>
         </form>
       </Card>
+
     </main>
   );
 }

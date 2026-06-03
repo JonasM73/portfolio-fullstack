@@ -26,7 +26,7 @@ public class AuthService
     {
         return await _users.Find(x => x.Role == UserRole.Admin.ToString()).AnyAsync();
     }
-
+    
     public async Task<(bool Success, string Message, string? Token)> ForgotPasswordAsync(
         ForgotPasswordRequest request)
     {

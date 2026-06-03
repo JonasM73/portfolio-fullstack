@@ -348,7 +348,8 @@ app.MapPost("/api/auth/forgot-password", async (
     {
         await emailService.SendPasswordResetEmailAsync(
             request.Email.ToLower(),
-            result.Token
+            result.Token,
+            request.FrontendUrl
         );
     }
 

@@ -18,13 +18,13 @@ public class AuthEmailService
 
     public async Task SendPasswordResetEmailAsync(
         string email,
-        string token)
+        string token,
+        string? frontendUrl)
     {
         var apiKey = _configuration["Resend:ApiKey"];
         var from = _configuration["Resend:From"];
         if (string.IsNullOrWhiteSpace(from))
             throw new InvalidOperationException("Resend sender is missing.");
-        var frontendUrl = _configuration["Frontend:Url"];
 
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("Resend API key is missing.");
