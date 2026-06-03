@@ -64,7 +64,17 @@ public class UserProfile
 
     [BsonElement("isPublic")]
     public bool IsPublic { get; set; } = true;
+    [BsonElement("education")]
+    public List<EducationItem> Education { get; set; } = [];
 
+    [BsonElement("licenses")]
+    public List<LicenseItem> Licenses { get; set; } = [];
+
+    [BsonElement("languages")]
+    public List<LanguageItem> Languages { get; set; } = [];
+
+    [BsonElement("certifications")]
+    public List<CertificationItem> Certifications { get; set; } = [];
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -85,4 +95,38 @@ public class TimelineItem
     public string Title { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public bool IsCurrent { get; set; }
+}
+public class EducationItem
+{
+    public string School { get; set; } = string.Empty;
+    public string Degree { get; set; } = string.Empty;
+    public string Field { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty; // Bac, Bac+2, Bac+3, Bac+5
+    public string StartYear { get; set; } = string.Empty;
+    public string? EndYear { get; set; }
+    public string Status { get; set; } = "in_progress"; // in_progress, completed, stopped
+    public string? Description { get; set; }
+}
+
+public class LicenseItem
+{
+    public string Name { get; set; } = string.Empty; // Permis B, A2, bateau côtier...
+    public string Status { get; set; } = "obtained"; // obtained, in_progress, planned
+    public string? ObtainedYear { get; set; }
+}
+
+public class LanguageItem
+{
+    public string Name { get; set; } = string.Empty; // Français, Anglais...
+    public string Level { get; set; } = string.Empty; // Natif, B1, B2, C1...
+    public string? Score { get; set; } // TOEIC 850, IELTS 6.5...
+    public string? Description { get; set; }
+}
+
+public class CertificationItem
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Organization { get; set; }
+    public string? Year { get; set; }
+    public string? Url { get; set; }
 }

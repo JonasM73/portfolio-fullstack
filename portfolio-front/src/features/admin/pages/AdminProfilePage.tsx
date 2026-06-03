@@ -17,7 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import { IconPicker } from "../components/profile/IconPicker";
 import {
   profileService,
   type ProfileCard,
@@ -526,7 +526,10 @@ function CardsSection({
           >
             <div className="grid gap-4 md:grid-cols-2">
               <Input label="Titre" value={item.title} onChange={(v) => onChange(index, "title", v)} />
-              <Input label="Icône" value={item.icon ?? ""} onChange={(v) => onChange(index, "icon", v)} />
+              <IconPicker
+                value={item.icon}
+                onChange={(v) => onChange(index, "icon", v)}
+              />
             </div>
 
             <Textarea label="Description" value={item.description} onChange={(v) => onChange(index, "description", v)} />
