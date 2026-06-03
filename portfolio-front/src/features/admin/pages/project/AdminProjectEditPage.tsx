@@ -15,11 +15,11 @@ import {
   X,
 } from "lucide-react";
 
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
-import { projectService } from "../services/projectService";
-import type { Project, ProjectFile, ProjectForm } from "../types/project.types";
+import { projectService } from "../../services/projectService";
+import type { Project, ProjectFile, ProjectForm } from "../../types/project.types";
 
 export default function AdminProjectEditPage() {
   const { id } = useParams();

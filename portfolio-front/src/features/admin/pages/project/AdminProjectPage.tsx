@@ -11,19 +11,19 @@ import {
   Plus,
 } from "lucide-react";
 
-import { useAuth } from "../../auth/context/AuthContext";
+import { useAuth } from "../../../auth/context/AuthContext";
 
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 
-import ProjectAdminCard from "../components/projects/ProjectAdminCard";
+import ProjectAdminCard from "../../components/projects/ProjectAdminCard";
 
 import {
   projectService,
-} from "../services/projectService";
+} from "../../services/projectService";
 
 import type {
   Project,
-} from "../types/project.types";
+} from "../../types/project.types";
 
 export default function AdminProjectsPage() {
   const { token } =

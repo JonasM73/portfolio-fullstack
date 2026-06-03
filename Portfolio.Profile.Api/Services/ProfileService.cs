@@ -108,7 +108,6 @@ public async Task<bool> DeleteByAuthUserIdAsync(string authUserId)
             {
                 Name = l.Name,
                 Level = l.Level,
-                Score = l.Score,
                 Description = l.Description
             })
             .ToList();
