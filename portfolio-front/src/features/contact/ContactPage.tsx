@@ -201,7 +201,7 @@ export default function ContactPage() {
               </Label>
               <Input
                 name="subject"
-                placeholder="ex : Demande de collaboration"
+                placeholder="ex : Je t'aime Jonas, travaillons ensemble !"
                 value={form.subject}
                 onChange={handleChange}
                 className={inputClass}
