@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<ProfileService>();
-
+builder.Services.AddSingleton<ProfileBlobStorageService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCors", policy =>

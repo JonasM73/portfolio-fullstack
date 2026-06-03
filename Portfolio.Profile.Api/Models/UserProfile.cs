@@ -17,6 +17,9 @@ public class UserProfile
     [BsonElement("lastName")]
     public string LastName { get; set; } = string.Empty;
 
+    [BsonElement("avatar")]
+    public ProfileFile? Avatar { get; set; }
+
     [BsonElement("headline")]
     public string Headline { get; set; } = string.Empty;
 
@@ -137,4 +140,12 @@ public class SkillItem
     public string Name { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public int Level { get; set; } = 3;
+}
+
+public class ProfileFile
+{
+    public string Url { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string FileType { get; set; } = string.Empty;
+    public long Size { get; set; }
 }

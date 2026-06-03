@@ -35,7 +35,7 @@ export type UserProfile = {
   lastName: string;
   headline: string;
   bio: string;
-
+  avatar?: ProfileFile | null;
   dateOfBirth?: string;
 
   city: string;
@@ -95,8 +95,29 @@ export type SkillItem = {
   category: string;
   level: number;
 };
-
+export type ProfileFile = {
+  url: string;
+  fileName: string;
+  fileType: string;
+  size: number;
+};
 export const profileService = {
+  uploadAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await profileApi.post<ProfileFile>(
+      "/profile/me/avatar",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    return response.data;
+  },
   getMe: async () => {
     const response =
       await profileApi.get<UserProfile>(

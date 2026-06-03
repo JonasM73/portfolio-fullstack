@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Portfolio.Profile.Api.Dtos;
 using Portfolio.Profile.Api.Services;
-
+using Portfolio.Profile.Api.Models;
 namespace Portfolio.Profile.Api.Controllers;
 
 [ApiController]
@@ -11,10 +11,44 @@ namespace Portfolio.Profile.Api.Controllers;
 public class ProfileController : ControllerBase
 {
     private readonly ProfileService _profileService;
+    private readonly ProfileBlobStorageService _blobStorageService;
 
-    public ProfileController(ProfileService profileService)
+    public ProfileController(
+        ProfileService profileService,
+        ProfileBlobStorageService blobStorageService)
     {
         _profileService = profileService;
+        _blobStorageService = blobStorageService;
+    }
+    [Authorize]
+    [HttpPost("me/avatar")]
+    public async Task<IActionResult> UploadAvatar(IFormFile file)
+    {
+        var authUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(authUserId))
+            return Unauthorized();
+
+        if (file is null || file.Length == 0)
+            return BadRequest(new { message = "Aucun fichier envoyé." });
+
+        if (!file.ContentType.StartsWith("image/"))
+            return BadRequest(new { message = "Le fichier doit être une image." });
+
+        var avatar = await _blobStorageService.UploadAvatarAsync(
+            file,
+            authUserId
+        );
+
+        var profile = await _profileService.UpdateAvatarAsync(
+            authUserId,
+            avatar
+        );
+
+        if (profile is null)
+            return NotFound(new { message = "Profil introuvable." });
+
+        return Ok(profile.Avatar);
     }
     [HttpPost("create")]
     public async Task<IActionResult> CreateProfile(CreateProfileRequest request)

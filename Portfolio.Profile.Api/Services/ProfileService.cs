@@ -53,6 +53,25 @@ public class ProfileService
 
         return profile;
     }
+public async Task<UserProfile?> UpdateAvatarAsync(
+    string authUserId,
+        ProfileFile avatar)
+    {
+        var profile = await GetByAuthUserIdAsync(authUserId);
+
+        if (profile is null)
+            return null;
+
+        profile.Avatar = avatar;
+        profile.UpdatedAt = DateTime.UtcNow;
+
+        await _profiles.ReplaceOneAsync(
+            p => p.AuthUserId == authUserId,
+            profile
+        );
+
+        return profile;
+    }
 public async Task<bool> DeleteByAuthUserIdAsync(string authUserId)
 {
     var result = await _profiles.DeleteOneAsync(p => p.AuthUserId == authUserId);
@@ -74,6 +93,15 @@ public async Task<bool> DeleteByAuthUserIdAsync(string authUserId)
         profile.City = request.City;
         profile.Country = request.Country;
         profile.Email = request.Email;
+        profile.Avatar = request.Avatar is null
+        ? null
+        : new ProfileFile
+        {
+            Url = request.Avatar.Url,
+            FileName = request.Avatar.FileName,
+            FileType = request.Avatar.FileType,
+            Size = request.Avatar.Size
+        };    
         profile.LinkedinUrl = request.LinkedinUrl;
         profile.GithubUrl = request.GithubUrl;
         profile.School = request.School;

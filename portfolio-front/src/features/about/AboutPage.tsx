@@ -117,49 +117,58 @@ export default function AboutPage() {
 
         <div className="relative">
           <div className="absolute -left-6 top-10 h-24 w-24 rounded-full bg-teal-400/20 blur-2xl" />
-          <div className="absolute -right-8 bottom-8 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
+          <div className="absolute -right-8 bottom-8 h-32 w-32 rounded-full bg-orange-300/20 blur-3xl" />
 
-          <div className="relative rounded-[3rem] bg-zinc-950 p-8 text-white shadow-2xl">
-            <div className="absolute right-8 top-8 h-24 w-24 rounded-full border border-white/10" />
-            <div className="absolute bottom-10 left-10 h-16 w-16 rounded-full border border-white/10" />
-
-            <div className="relative flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white/10 text-3xl font-black ring-1 ring-white/10">
-              {profile.firstName?.[0]}
-              {profile.lastName?.[0]}
+          <div className="relative overflow-hidden rounded-[3rem] border border-white/40 bg-white/60 p-5 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+            <div className="overflow-hidden rounded-[2.5rem] bg-zinc-100">
+              {profile.avatar?.url ? (
+                <img
+                  src={profile.avatar.url}
+                  alt={fullName}
+                  className="h-[520px] w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-[520px] items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-700 text-7xl font-black text-white">
+                  {profile.firstName?.[0]}
+                  {profile.lastName?.[0]}
+                </div>
+              )}
             </div>
 
-            <h2 className="relative mt-8 text-4xl font-black">
-              {fullName}
-            </h2>
+            <div className="mt-5 rounded-[2rem] bg-zinc-950 p-5 text-white shadow-xl">
+              <h3 className="text-2xl font-black">
+                {fullName}
+              </h3>
 
-            <p className="relative mt-3 text-white/60">
-              {profile.workTitle} chez {profile.company}
-            </p>
+              <p className="mt-1 text-sm text-white/60">
+                {profile.headline}
+              </p>
 
+              <div className="mt-5 space-y-3 text-sm">
+                <DarkLine
+                  icon={<MapPin size={16} />}
+                  value={`${profile.city}, ${profile.country}`}
+                />
 
-            <div className="relative mt-8 grid gap-3">
-              <DarkLine
-                icon={<MapPin className="h-4 w-4" />}
-                value={`${profile.city}, ${profile.country}`}
-              />
+                <DarkLine
+                  icon={<Mail size={16} />}
+                  value={profile.email}
+                />
 
-              <DarkLine
-                icon={<Mail className="h-4 w-4" />}
-                value={profile.email}
-              />
+                {age && (
+                  <DarkLine
+                    icon={<Calendar size={16} />}
+                    value={`${age} ans`}
+                  />
+                )}
 
-              <DarkLine
-                icon={<Calendar className="h-4 w-4" />}
-                value={age ? `${age} ans` : "Âge non renseigné"}
-              />
-              <DarkLine
-                icon={<Briefcase className="h-4 w-4" />}
-                value={`${profile.school ?? "Ecole non renseignée"} - ${profile.graduationYear ?? "Non renseigné"}`}
-              />
-              <DarkLine
-                icon={<Briefcase className="h-4 w-4" />}
-                value={profile.company ?? "Entreprise non renseignée"}
-              />
+                {profile.company && (
+                  <DarkLine
+                    icon={<Briefcase size={16} />}
+                    value={profile.company}
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>

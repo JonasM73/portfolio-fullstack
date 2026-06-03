@@ -1,35 +1,85 @@
+import { useState } from "react";
 import {
   AtSign,
   Calendar,
+  ImagePlus,
+  Loader2,
   MapPin,
   Sparkles,
   UserRound,
 } from "lucide-react";
 
-import type { UserProfile } from "../../../services/profileService";
+import {
+  profileService,
+  type UserProfile,
+} from "../../../services/profileService";
+
 import { Input } from "../shared/Input";
 import { Textarea } from "../shared/Textarea";
 
 type Props = {
   profile: UserProfile;
-  updateField: (
-    field: keyof UserProfile,
-    value: string | number | undefined
+  updateField: <K extends keyof UserProfile>(
+    field: K,
+    value: UserProfile[K]
   ) => void;
 };
 
-export function IdentityTab({
-  profile,
-  updateField,
-}: Props) {
+export function IdentityTab({ profile, updateField }: Props) {
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    setAvatarError("");
+
+    if (!file.type.startsWith("image/")) {
+      setAvatarError("Le fichier doit être une image.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("L’image ne doit pas dépasser 2 Mo.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const avatar = await profileService.uploadAvatar(file);
+      updateField("avatar", avatar);
+    } catch (error) {
+      console.error(error);
+      setAvatarError("Impossible d’envoyer la photo.");
+    } finally {
+      setIsUploadingAvatar(false);
+      event.target.value = "";
+    }
+  };
+
   return (
     <section>
       <div className="mb-6 overflow-hidden rounded-[1.75rem] border border-zinc-100 bg-gradient-to-br from-zinc-950 to-zinc-800 p-6 text-white shadow-md">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-xl font-black ring-1 ring-white/10">
-              {(profile.firstName?.[0] ?? "J")}
-              {(profile.lastName?.[0] ?? "M")}
+            <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-[1.7rem] bg-white/10 text-xl font-black ring-1 ring-white/10">
+              {profile.avatar?.url ? (
+                <img
+                  src={profile.avatar.url}
+                  alt={`${profile.firstName} ${profile.lastName}`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <>
+                  {(profile.firstName?.[0] ?? "J")}
+                  {(profile.lastName?.[0] ?? "M")}
+                </>
+              )}
             </div>
 
             <div>
@@ -38,8 +88,7 @@ export function IdentityTab({
               </p>
 
               <h2 className="mt-1 text-2xl font-black">
-                {profile.firstName || "Prénom"}{" "}
-                {profile.lastName || "Nom"}
+                {profile.firstName || "Prénom"} {profile.lastName || "Nom"}
               </h2>
 
               <p className="mt-1 max-w-xl text-sm text-white/60">
@@ -49,10 +98,30 @@ export function IdentityTab({
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-white/80">
-            Identité principale
-          </div>
+          <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-white/80 transition hover:bg-white/15">
+            {isUploadingAvatar ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImagePlus className="h-4 w-4" />
+            )}
+
+            {profile.avatar?.url ? "Changer la photo" : "Ajouter une photo"}
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarUpload}
+              disabled={isUploadingAvatar}
+            />
+          </label>
         </div>
+
+        {avatarError && (
+          <p className="mt-4 rounded-2xl bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+            {avatarError}
+          </p>
+        )}
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
@@ -151,6 +220,21 @@ export function IdentityTab({
             Aperçu rapide
           </h3>
 
+          <div className="mt-4 overflow-hidden rounded-[1.5rem] bg-white shadow-sm">
+            {profile.avatar?.url ? (
+              <img
+                src={profile.avatar.url}
+                alt="Photo de profil"
+                className="h-64 w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-64 items-center justify-center bg-zinc-100 text-4xl font-black text-zinc-400">
+                {(profile.firstName?.[0] ?? "J")}
+                {(profile.lastName?.[0] ?? "M")}
+              </div>
+            )}
+          </div>
+
           <div className="mt-4 space-y-3">
             <PreviewItem
               label="Nom complet"
@@ -177,28 +261,7 @@ export function IdentityTab({
             />
           </div>
 
-          <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm text-teal-800">
-            <p className="font-black">
-              Conseil
-            </p>
-            <p className="mt-1 leading-relaxed">
-              Ta headline doit être courte, claire et orientée recruteur :
-              formation, spécialité, technologies ou domaine.
-            </p>
-          </div>
-
-          <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
-            <div className="mb-2 flex items-center gap-2 font-black text-zinc-800">
-              <Calendar className="h-4 w-4" />
-              Format attendu
-            </div>
-
-            <p>
-              Les champs marqués avec{" "}
-              <span className="font-black text-teal-600">*</span>{" "}
-              sont nécessaires pour avoir une page publique complète.
-            </p>
-          </div>
+          
         </aside>
       </div>
     </section>
@@ -224,13 +287,9 @@ function Panel({
         </div>
 
         <div>
-          <h3 className="text-lg font-black text-zinc-900">
-            {title}
-          </h3>
+          <h3 className="text-lg font-black text-zinc-900">{title}</h3>
 
-          <p className="mt-1 text-sm text-zinc-500">
-            {description}
-          </p>
+          <p className="mt-1 text-sm text-zinc-500">{description}</p>
         </div>
       </div>
 

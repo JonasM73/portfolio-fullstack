@@ -32,7 +32,7 @@ const emptyProfile: UserProfile = {
   headline: "",
   bio: "",
   dateOfBirth: "",
-
+  avatar: null,
   city: "",
   country: "",
   email: "",
@@ -137,12 +137,9 @@ export default function AdminProfilePage() {
     loadProfile();
   }, []);
 
-  const updateField = (
-    field: keyof UserProfile,
-    value:
-      | string
-      | number
-      | undefined
+  const updateField = <K extends keyof UserProfile>(
+    field: K,
+    value: UserProfile[K]
   ) => {
     setSaved(false);
 

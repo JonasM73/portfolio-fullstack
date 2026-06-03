@@ -14,6 +14,7 @@ public class UpdateProfileRequest
 
     public string? LinkedinUrl { get; set; }
     public string? GithubUrl { get; set; }
+    public ProfileFileDto? Avatar { get; set; }
 
     public string? School { get; set; }
     public string? WorkTitle { get; set; }
@@ -88,4 +89,12 @@ public class CreateProfileRequest
 {
     public string AuthUserId { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
+}
+
+public class ProfileFileDto
+{
+    public string Url { get; set; } = string.Empty;
+    public string FileName { get; set; } = string.Empty;
+    public string FileType { get; set; } = string.Empty;
+    public long Size { get; set; }
 }
