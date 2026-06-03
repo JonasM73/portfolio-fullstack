@@ -1,6 +1,8 @@
 using MongoDB.Driver;
 using Portfolio.Auth.Api.Dtos;
 using Portfolio.Auth.Api.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Portfolio.Auth.Api.Services;
 
@@ -25,6 +27,81 @@ public class AuthService
         return await _users.Find(x => x.Role == UserRole.Admin.ToString()).AnyAsync();
     }
 
+    public async Task<(bool Success, string Message, string? Token)> ForgotPasswordAsync(
+        ForgotPasswordRequest request)
+    {
+        var email = request.Email.ToLower();
+
+        var user = await _users
+            .Find(x => x.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user is null)
+        {
+            return (true, "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.", null);
+        }
+
+        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+        var tokenHash = HashToken(token);
+
+        var update = Builders<AppUser>.Update
+            .Set(x => x.PasswordResetTokenHash, tokenHash)
+            .Set(x => x.PasswordResetTokenExpiresAt, DateTime.UtcNow.AddMinutes(30))
+            .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+        await _users.UpdateOneAsync(x => x.Id == user.Id, update);
+
+        return (
+            true,
+            "Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.",
+            token
+        );
+    }
+
+    public async Task<(bool Success, string Message)> ResetPasswordAsync(
+        ResetPasswordRequest request)
+    {
+        var email = request.Email.ToLower();
+
+        var user = await _users
+            .Find(x => x.Email == email)
+            .FirstOrDefaultAsync();
+
+        if (user is null)
+            return (false, "Lien de réinitialisation invalide ou expiré.");
+
+        if (string.IsNullOrWhiteSpace(user.PasswordResetTokenHash))
+            return (false, "Lien de réinitialisation invalide ou expiré.");
+
+        if (user.PasswordResetTokenExpiresAt is null ||
+            user.PasswordResetTokenExpiresAt < DateTime.UtcNow)
+            return (false, "Lien de réinitialisation expiré.");
+
+        var tokenHash = HashToken(request.Token);
+
+        if (tokenHash != user.PasswordResetTokenHash)
+            return (false, "Lien de réinitialisation invalide ou expiré.");
+
+        if (!_passwordPolicy.IsValid(request.NewPassword, out var error))
+            return (false, error);
+
+        var update = Builders<AppUser>.Update
+            .Set(x => x.PasswordHash, BCrypt.Net.BCrypt.HashPassword(request.NewPassword))
+            .Unset(x => x.PasswordResetTokenHash)
+            .Unset(x => x.PasswordResetTokenExpiresAt)
+            .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+        await _users.UpdateOneAsync(x => x.Id == user.Id, update);
+
+        return (true, "Mot de passe réinitialisé avec succès.");
+    }
+
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(bytes);
+    }
     public async Task<(bool Success, string Message)> CreateFirstAdminAsync(SetupAdminRequest request)
     {
         var adminExists = await AdminExistsAsync();
@@ -179,11 +256,12 @@ public class AuthService
 
         return (true, "Compte supprimé avec succès.");
     }
-    public async Task<AppUser?> GetUserByEmailAsync(
-        string email)
+    public async Task<AppUser?> GetUserByEmailAsync(string email)
     {
+        var normalizedEmail = email.ToLower();
+
         return await _users
-            .Find(x => x.Email == email)
+            .Find(x => x.Email == normalizedEmail)
             .FirstOrDefaultAsync();
     }
     public async Task<(bool Success, string Message)> ChangePasswordAsync(

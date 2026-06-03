@@ -108,6 +108,7 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<PasswordPolicyService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ProfileClient>();
+builder.Services.AddScoped<AuthEmailService>();
 builder.Services.AddHttpClient(
     "ProfileApi",
     client =>
@@ -336,5 +337,35 @@ app.MapDelete("/api/auth/me", async (
         : Results.BadRequest(new { message = result.Message });
 })
 .RequireAuthorization("RequireAuthenticated");
+app.MapPost("/api/auth/forgot-password", async (
+    ForgotPasswordRequest request,
+    AuthService authService,
+    AuthEmailService emailService) =>
+{
+    var result = await authService.ForgotPasswordAsync(request);
 
+    if (result.Token is not null)
+    {
+        await emailService.SendPasswordResetEmailAsync(
+            request.Email.ToLower(),
+            result.Token
+        );
+    }
+
+    return Results.Ok(new
+    {
+        message = result.Message
+    });
+});
+
+app.MapPost("/api/auth/reset-password", async (
+    ResetPasswordRequest request,
+    AuthService authService) =>
+{
+    var result = await authService.ResetPasswordAsync(request);
+
+    return result.Success
+        ? Results.Ok(new { message = result.Message })
+        : Results.BadRequest(new { message = result.Message });
+});
 app.Run();

@@ -19,6 +19,12 @@ public class AppUser
 
     [BsonElement("role")]
     public string Role { get; set; } = UserRole.User.ToString();
+    
+    [BsonElement("passwordResetTokenHash")]
+    public string? PasswordResetTokenHash { get; set; }
+
+    [BsonElement("passwordResetTokenExpiresAt")]
+    public DateTime? PasswordResetTokenExpiresAt { get; set; }
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
