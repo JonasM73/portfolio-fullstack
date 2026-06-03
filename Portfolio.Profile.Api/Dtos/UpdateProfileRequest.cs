@@ -23,8 +23,53 @@ public class UpdateProfileRequest
     public List<ProfileCardDto> Interests { get; set; } = [];
     public List<ProfileCardDto> Traits { get; set; } = [];
     public List<TimelineItemDto> Timeline { get; set; } = [];
+    public List<EducationItemDto> Education { get; set; } = [];
+    public List<LicenseItemDto> Licenses { get; set; } = [];
+    public List<LanguageItemDto> Languages { get; set; } = [];
+    public List<CertificationItemDto> Certifications { get; set; } = [];
+    public List<SkillItemDto> Skills { get; set; } = [];
+}
+public class EducationItemDto
+{
+    public string School { get; set; } = string.Empty;
+    public string Degree { get; set; } = string.Empty;
+    public string Field { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public string StartYear { get; set; } = string.Empty;
+    public string? EndYear { get; set; }
+    public string Status { get; set; } = "in_progress";
+    public string? Description { get; set; }
 }
 
+public class LicenseItemDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string Status { get; set; } = "obtained";
+    public string? ObtainedYear { get; set; }
+}
+
+public class LanguageItemDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public string? Score { get; set; }
+    public string? Description { get; set; }
+}
+
+public class CertificationItemDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string? Organization { get; set; }
+    public string? Year { get; set; }
+    public string? Url { get; set; }
+}
+
+public class SkillItemDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public int Level { get; set; } = 3;
+}
 public class ProfileCardDto
 {
     public string Title { get; set; } = string.Empty;

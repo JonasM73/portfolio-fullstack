@@ -49,10 +49,51 @@ export type UserProfile = {
   workTitle?: string;
   company?: string;
   graduationYear?: number;
+  education: EducationItem[];
+  licenses: LicenseItem[];
+  languages: LanguageItem[];
+  certifications: CertificationItem[];
+  skills: SkillItem[];
 
   interests: ProfileCard[];
   traits: ProfileCard[];
   timeline: TimelineItem[];
+};
+export type EducationItem = {
+  school: string;
+  degree: string;
+  field: string;
+  level: string;
+  startYear: string;
+  endYear?: string;
+  status: string;
+  description?: string;
+};
+
+export type LicenseItem = {
+  name: string;
+  status: string;
+  obtainedYear?: string;
+};
+
+export type LanguageItem = {
+  name: string;
+  level: string;
+  score?: string;
+  description?: string;
+};
+
+export type CertificationItem = {
+  name: string;
+  organization?: string;
+  year?: string;
+  url?: string;
+};
+
+export type SkillItem = {
+  name: string;
+  category: string;
+  level: number;
 };
 
 export const profileService = {

@@ -75,6 +75,9 @@ public class UserProfile
 
     [BsonElement("certifications")]
     public List<CertificationItem> Certifications { get; set; } = [];
+    [BsonElement("skills")]
+    public List<SkillItem> Skills { get; set; } = [];
+
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -129,4 +132,10 @@ public class CertificationItem
     public string? Organization { get; set; }
     public string? Year { get; set; }
     public string? Url { get; set; }
+}
+public class SkillItem
+{
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public int Level { get; set; } = 3;
 }

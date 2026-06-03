@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
+  BadgeCheck,
   Briefcase,
-  Calendar,
   CheckCircle2,
-  
+  Code2,
+  FileBadge,
   GraduationCap,
-  
+  Languages,
   Loader2,
   Mail,
   MapPin,
@@ -17,10 +18,16 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import { IconPicker } from "../components/profile/IconPicker";
 import {
   profileService,
+  type CertificationItem,
+  type EducationItem,
+  type LanguageItem,
+  type LicenseItem,
   type ProfileCard,
+  type SkillItem,
   type TimelineItem,
   type UserProfile,
 } from "../services/profileService";
@@ -43,9 +50,32 @@ const emptyProfile: UserProfile = {
   interests: [],
   traits: [],
   timeline: [],
+  education: [],
+  licenses: [],
+  languages: [],
+  certifications: [],
+  skills: [],
 };
 
+type Tab =
+  | "identity"
+  | "career"
+  | "education"
+  | "skills"
+  | "extra"
+  | "content";
+
+const tabs: { id: Tab; label: string; icon: ReactNode }[] = [
+  { id: "identity", label: "Identité", icon: <UserRound /> },
+  { id: "career", label: "Carrière", icon: <Briefcase /> },
+  { id: "education", label: "Formations", icon: <GraduationCap /> },
+  { id: "skills", label: "Compétences", icon: <Code2 /> },
+  { id: "extra", label: "Langues & Permis", icon: <Languages /> },
+  { id: "content", label: "Contenu page", icon: <Sparkles /> },
+];
+
 export default function AdminProfilePage() {
+  const [activeTab, setActiveTab] = useState<Tab>("identity");
   const [profile, setProfile] = useState<UserProfile>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,8 +92,9 @@ export default function AdminProfilePage() {
       profile.email,
     ];
 
-    const filled = required.filter((v) => v?.trim()).length;
-    return Math.round((filled / required.length) * 100);
+    return Math.round(
+      (required.filter((v) => v?.trim()).length / required.length) * 100
+    );
   }, [profile]);
 
   useEffect(() => {
@@ -74,12 +105,15 @@ export default function AdminProfilePage() {
         setProfile({
           ...emptyProfile,
           ...data,
-          dateOfBirth: data.dateOfBirth
-            ? data.dateOfBirth.split("T")[0]
-            : "",
+          dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split("T")[0] : "",
           interests: data.interests ?? [],
           traits: data.traits ?? [],
           timeline: data.timeline ?? [],
+          education: data.education ?? [],
+          licenses: data.licenses ?? [],
+          languages: data.languages ?? [],
+          certifications: data.certifications ?? [],
+          skills: data.skills ?? [],
         });
       } finally {
         setIsLoading(false);
@@ -95,66 +129,6 @@ export default function AdminProfilePage() {
   ) => {
     setSaved(false);
     setProfile((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const addCard = (section: "interests" | "traits") => {
-    setProfile((prev) => ({
-      ...prev,
-      [section]: [...prev[section], { title: "", description: "", icon: "" }],
-    }));
-  };
-
-  const updateCard = (
-    section: "interests" | "traits",
-    index: number,
-    field: keyof ProfileCard,
-    value: string
-  ) => {
-    setSaved(false);
-    setProfile((prev) => ({
-      ...prev,
-      [section]: prev[section].map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }));
-  };
-
-  const removeCard = (section: "interests" | "traits", index: number) => {
-    setProfile((prev) => ({
-      ...prev,
-      [section]: prev[section].filter((_, i) => i !== index),
-    }));
-  };
-
-  const addTimeline = () => {
-    setProfile((prev) => ({
-      ...prev,
-      timeline: [
-        ...prev.timeline,
-        { date: "", title: "", text: "", isCurrent: false },
-      ],
-    }));
-  };
-
-  const updateTimeline = (
-    index: number,
-    field: keyof TimelineItem,
-    value: string | boolean
-  ) => {
-    setSaved(false);
-    setProfile((prev) => ({
-      ...prev,
-      timeline: prev.timeline.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      ),
-    }));
-  };
-
-  const removeTimeline = (index: number) => {
-    setProfile((prev) => ({
-      ...prev,
-      timeline: prev.timeline.filter((_, i) => i !== index),
-    }));
   };
 
   const handleSave = async () => {
@@ -178,10 +152,7 @@ export default function AdminProfilePage() {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#F8F6F2]">
-        <div className="flex items-center gap-3 rounded-3xl bg-white px-6 py-4 shadow-lg">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="font-semibold">Chargement du profil...</span>
-        </div>
+        <Loader2 className="h-6 w-6 animate-spin" />
       </main>
     );
   }
@@ -189,32 +160,26 @@ export default function AdminProfilePage() {
   return (
     <main className="min-h-screen bg-[#F8F6F2] px-6 py-8 text-zinc-900">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
           <div>
             <Link
               to="/admin/projects"
-              className="mb-4 inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-zinc-900"
+              className="inline-flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-zinc-900"
             >
               <ArrowLeft className="h-4 w-4" />
               Retour au dashboard
             </Link>
 
-            <p className="font-bold text-teal-600">Portfolio public</p>
-
-            <h1 className="mt-1 text-4xl font-black tracking-tight md:text-5xl">
-              Modifier mon profil
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-zinc-500">
-              Renseigne les informations qui alimenteront automatiquement ta
-              page À propos.
+            <h1 className="mt-3 text-4xl font-black">Modifier mon profil</h1>
+            <p className="mt-2 text-zinc-500">
+              Toutes les données publiques de ta page À propos.
             </p>
           </div>
 
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-6 py-4 font-bold text-white shadow-xl transition hover:-translate-y-0.5 hover:bg-zinc-800 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-zinc-950 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {isSaving ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -227,139 +192,139 @@ export default function AdminProfilePage() {
           </button>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-8">
-            <Section
-              icon={<UserRound className="h-5 w-5" />}
-              title="Identité"
-              description="Les informations principales visibles sur ton portfolio."
+        <div className="mb-6 grid gap-3 rounded-[1.5rem] bg-white p-3 shadow-sm md:grid-cols-6">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold transition [&>svg]:h-4 [&>svg]:w-4 ${
+                activeTab === tab.id
+                  ? "bg-zinc-950 text-white"
+                  : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+              }`}
             >
-              <div className="grid gap-5 md:grid-cols-2">
-                <Input required label="Prénom" value={profile.firstName} onChange={(v) => updateField("firstName", v)} />
-                <Input required label="Nom" value={profile.lastName} onChange={(v) => updateField("lastName", v)} />
-                <Input required label="Titre / headline" value={profile.headline} onChange={(v) => updateField("headline", v)} />
-                <Input required label="Email public" value={profile.email} onChange={(v) => updateField("email", v)} />
-                <Input required label="Ville" value={profile.city} onChange={(v) => updateField("city", v)} />
-                <Input required label="Pays" value={profile.country} onChange={(v) => updateField("country", v)} />
-                <Input label="Date de naissance" type="date" value={profile.dateOfBirth ?? ""} onChange={(v) => updateField("dateOfBirth", v)} />
-              </div>
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-              <Textarea required label="Bio" value={profile.bio} onChange={(v) => updateField("bio", v)} />
-            </Section>
+        <div className="grid gap-6 lg:grid-cols-[1fr_330px]">
+          <div className="rounded-[2rem] bg-white p-6 shadow-lg">
+            {activeTab === "identity" && (
+              <Section title="Identité" description="Informations principales.">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Input required label="Prénom" value={profile.firstName} onChange={(v) => updateField("firstName", v)} />
+                  <Input required label="Nom" value={profile.lastName} onChange={(v) => updateField("lastName", v)} />
+                  <Input required label="Headline" value={profile.headline} onChange={(v) => updateField("headline", v)} />
+                  <Input required label="Email public" value={profile.email} onChange={(v) => updateField("email", v)} />
+                  <Input required label="Ville" value={profile.city} onChange={(v) => updateField("city", v)} />
+                  <Input required label="Pays" value={profile.country} onChange={(v) => updateField("country", v)} />
+                  <Input label="Date de naissance" type="date" value={profile.dateOfBirth ?? ""} onChange={(v) => updateField("dateOfBirth", v)} />
+                </div>
 
-            <Section
-              icon={<Briefcase className="h-5 w-5" />}
-              title="Études & alternance"
-              description="École, entreprise, poste et diplôme attendu."
-            >
-              <div className="grid gap-5 md:grid-cols-2">
-                <Input label="École" value={profile.school ?? ""} onChange={(v) => updateField("school", v)} />
-                <Input label="Année de diplôme" type="number" value={profile.graduationYear?.toString() ?? ""} onChange={(v) => updateField("graduationYear", v ? Number(v) : undefined)} />
-                <Input label="Entreprise" value={profile.company ?? ""} onChange={(v) => updateField("company", v)} />
-                <Input label="Poste" value={profile.workTitle ?? ""} onChange={(v) => updateField("workTitle", v)} />
-              </div>
-            </Section>
+                <Textarea required label="Bio" value={profile.bio} onChange={(v) => updateField("bio", v)} />
+              </Section>
+            )}
 
-            <Section
-              icon={<Sparkles className="h-5 w-5" />}
-              title="Liens"
-              description="Tes liens publics professionnels."
-            >
-              <div className="grid gap-5 md:grid-cols-2">
-                <Input label="LinkedIn" value={profile.linkedinUrl ?? ""} onChange={(v) => updateField("linkedinUrl", v)} />
-                <Input label="GitHub" value={profile.githubUrl ?? ""} onChange={(v) => updateField("githubUrl", v)} />
-              </div>
-            </Section>
+            {activeTab === "career" && (
+              <Section title="Carrière" description="Alternance, liens et situation actuelle.">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Input label="École actuelle" value={profile.school ?? ""} onChange={(v) => updateField("school", v)} />
+                  <Input label="Diplôme attendu" type="number" value={profile.graduationYear?.toString() ?? ""} onChange={(v) => updateField("graduationYear", v ? Number(v) : undefined)} />
+                  <Input label="Entreprise" value={profile.company ?? ""} onChange={(v) => updateField("company", v)} />
+                  <Input label="Poste" value={profile.workTitle ?? ""} onChange={(v) => updateField("workTitle", v)} />
+                  <Input label="LinkedIn" value={profile.linkedinUrl ?? ""} onChange={(v) => updateField("linkedinUrl", v)} />
+                  <Input label="GitHub" value={profile.githubUrl ?? ""} onChange={(v) => updateField("githubUrl", v)} />
+                </div>
+              </Section>
+            )}
 
-            <CardsSection
-              title="Motivations"
-              description="Cartes visibles dans la section motivations."
-              items={profile.interests}
-              onAdd={() => addCard("interests")}
-              onRemove={(i) => removeCard("interests", i)}
-              onChange={(i, f, v) => updateCard("interests", i, f, v)}
-            />
+            {activeTab === "education" && (
+              <EducationSection
+                items={profile.education}
+                setProfile={setProfile}
+                setSaved={setSaved}
+              />
+            )}
 
-            <CardsSection
-              title="Traits"
-              description="Qualités ou valeurs qui te définissent."
-              items={profile.traits}
-              onAdd={() => addCard("traits")}
-              onRemove={(i) => removeCard("traits", i)}
-              onChange={(i, f, v) => updateCard("traits", i, f, v)}
-            />
+            {activeTab === "skills" && (
+              <>
+                <SkillsSection
+                  items={profile.skills}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                />
 
-            <Section
-              icon={<Calendar className="h-5 w-5" />}
-              title="Parcours"
-              description="Timeline académique et professionnelle."
-              action={
-                <button
-                  onClick={addTimeline}
-                  className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white"
-                >
-                  <Plus className="h-4 w-4" />
-                  Ajouter
-                </button>
-              }
-            >
-              <div className="space-y-4">
-                {profile.timeline.map((item, index) => (
-                  <div
-                    key={index}
-                    className="rounded-[1.5rem] border border-zinc-100 bg-zinc-50 p-5"
-                  >
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <Input label="Période" value={item.date} onChange={(v) => updateTimeline(index, "date", v)} />
-                      <Input label="Titre" value={item.title} onChange={(v) => updateTimeline(index, "title", v)} />
-                    </div>
+                <CertificationsSection
+                  items={profile.certifications}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                />
+              </>
+            )}
 
-                    <Textarea label="Description" value={item.text} onChange={(v) => updateTimeline(index, "text", v)} />
+            {activeTab === "extra" && (
+              <>
+                <LanguagesSection
+                  items={profile.languages}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                />
 
-                    <div className="mt-4 flex items-center justify-between">
-                      <label className="flex items-center gap-2 text-sm font-bold text-zinc-600">
-                        <input
-                          type="checkbox"
-                          checked={item.isCurrent}
-                          onChange={(e) =>
-                            updateTimeline(index, "isCurrent", e.target.checked)
-                          }
-                        />
-                        En cours
-                      </label>
+                <LicensesSection
+                  items={profile.licenses}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                />
+              </>
+            )}
 
-                      <button
-                        onClick={() => removeTimeline(index)}
-                        className="inline-flex items-center gap-2 text-sm font-bold text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Section>
+            {activeTab === "content" && (
+              <>
+                <CardsSection
+                  title="Motivations"
+                  items={profile.interests}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                  field="interests"
+                />
+
+                <CardsSection
+                  title="Traits"
+                  items={profile.traits}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                  field="traits"
+                />
+
+                <TimelineSection
+                  items={profile.timeline}
+                  setProfile={setProfile}
+                  setSaved={setSaved}
+                />
+              </>
+            )}
           </div>
 
-          <aside className="h-fit rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-xl lg:sticky lg:top-8">
-            <div className="rounded-[1.5rem] bg-zinc-950 p-6 text-white">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-xl font-black">
+          <aside className="h-fit rounded-[2rem] bg-white p-6 shadow-lg lg:sticky lg:top-8">
+            <div className="rounded-[1.5rem] bg-zinc-950 p-5 text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-lg font-black">
                 {(profile.firstName?.[0] ?? "J")}
                 {(profile.lastName?.[0] ?? "M")}
               </div>
 
-              <h2 className="mt-5 text-2xl font-black">
+              <h2 className="mt-4 text-xl font-black">
                 {profile.firstName || "Prénom"} {profile.lastName || "Nom"}
               </h2>
 
-              <p className="mt-2 text-sm text-white/70">
-                {profile.headline || "Titre professionnel"}
+              <p className="mt-1 text-sm text-white/60">
+                {profile.headline || "Headline non renseignée"}
               </p>
             </div>
 
-            <div className="mt-6">
-              <div className="mb-2 flex items-center justify-between text-sm font-bold">
+            <div className="mt-5">
+              <div className="mb-2 flex justify-between text-sm font-bold">
                 <span>Complétion obligatoire</span>
                 <span>{completion}%</span>
               </div>
@@ -372,13 +337,13 @@ export default function AdminProfilePage() {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3 text-sm text-zinc-600">
-              <PreviewLine icon={<Mail />} value={profile.email || "Email non renseigné"} />
-              <PreviewLine icon={<MapPin />} value={`${profile.city || "Ville"}, ${profile.country || "Pays"}`} />
-              <PreviewLine icon={<GraduationCap />} value={profile.school || "École non renseignée"} />
-              <PreviewLine icon={<Briefcase />} value={profile.company || "Entreprise non renseignée"} />
-              <PreviewLine icon={<LinkedInIcon />} value={profile.linkedinUrl || "LinkedIn non renseigné"} />
-              <PreviewLine icon={<GitHubIcon />} value={profile.githubUrl || "GitHub non renseigné"} />
+            <div className="mt-5 space-y-3">
+              <Preview icon={<Mail />} value={profile.email || "Email non renseigné"} />
+              <Preview icon={<MapPin />} value={`${profile.city || "Ville"}, ${profile.country || "Pays"}`} />
+              <Preview icon={<GraduationCap />} value={`${profile.education.length} formation(s)`} />
+              <Preview icon={<Languages />} value={`${profile.languages.length} langue(s)`} />
+              <Preview icon={<BadgeCheck />} value={`${profile.licenses.length} permis`} />
+              <Preview icon={<Code2 />} value={`${profile.skills.length} compétence(s)`} />
             </div>
           </aside>
         </div>
@@ -387,38 +352,469 @@ export default function AdminProfilePage() {
   );
 }
 
+function EducationSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: EducationItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      education: [
+        ...p.education,
+        {
+          school: "",
+          degree: "",
+          field: "",
+          level: "",
+          startYear: "",
+          endYear: "",
+          status: "in_progress",
+          description: "",
+        },
+      ],
+    }));
+  };
+
+  const update = (index: number, field: keyof EducationItem, value: string) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      education: p.education.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      education: p.education.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Formations" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="École" value={item.school} onChange={(v) => update(index, "school", v)} />
+            <Input label="Diplôme" value={item.degree} onChange={(v) => update(index, "degree", v)} />
+            <Input label="Domaine" value={item.field} onChange={(v) => update(index, "field", v)} />
+            <Input label="Niveau" value={item.level} onChange={(v) => update(index, "level", v)} />
+            <Input label="Début" value={item.startYear} onChange={(v) => update(index, "startYear", v)} />
+            <Input label="Fin" value={item.endYear ?? ""} onChange={(v) => update(index, "endYear", v)} />
+          </div>
+
+          <Select label="Statut" value={item.status} onChange={(v) => update(index, "status", v)}>
+            <option value="in_progress">En cours</option>
+            <option value="completed">Terminé</option>
+            <option value="stopped">Arrêté</option>
+            <option value="none">Pas d’école</option>
+          </Select>
+
+          <Textarea label="Description" value={item.description ?? ""} onChange={(v) => update(index, "description", v)} />
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function SkillsSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: SkillItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      skills: [...p.skills, { name: "", category: "", level: 3 }],
+    }));
+  };
+
+  const update = (index: number, field: keyof SkillItem, value: string | number) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      skills: p.skills.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      skills: p.skills.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Compétences" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Input label="Nom" value={item.name} onChange={(v) => update(index, "name", v)} />
+            <Input label="Catégorie" value={item.category} onChange={(v) => update(index, "category", v)} />
+            <Input label="Niveau /5" type="number" value={item.level.toString()} onChange={(v) => update(index, "level", Number(v))} />
+          </div>
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function LanguagesSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: LanguageItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      languages: [...p.languages, { name: "", level: "", score: "", description: "" }],
+    }));
+  };
+
+  const update = (index: number, field: keyof LanguageItem, value: string) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      languages: p.languages.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      languages: p.languages.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Langues" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Input label="Langue" value={item.name} onChange={(v) => update(index, "name", v)} />
+            <Select label="Niveau" value={item.level} onChange={(v) => update(index, "level", v)}>
+              <option value="">Choisir</option>
+              <option value="Natif">Natif</option>
+              <option value="A1">A1</option>
+              <option value="A2">A2</option>
+              <option value="B1">B1</option>
+              <option value="B2">B2</option>
+              <option value="C1">C1</option>
+              <option value="C2">C2</option>
+            </Select>
+            <Input label="Score" value={item.score ?? ""} onChange={(v) => update(index, "score", v)} />
+          </div>
+
+          <Textarea label="Description" value={item.description ?? ""} onChange={(v) => update(index, "description", v)} />
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function LicensesSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: LicenseItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      licenses: [...p.licenses, { name: "", status: "obtained", obtainedYear: "" }],
+    }));
+  };
+
+  const update = (index: number, field: keyof LicenseItem, value: string) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      licenses: p.licenses.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      licenses: p.licenses.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Permis" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Input label="Nom" value={item.name} onChange={(v) => update(index, "name", v)} />
+            <Select label="Statut" value={item.status} onChange={(v) => update(index, "status", v)}>
+              <option value="obtained">Obtenu</option>
+              <option value="in_progress">En cours</option>
+              <option value="planned">Prévu</option>
+            </Select>
+            <Input label="Année" value={item.obtainedYear ?? ""} onChange={(v) => update(index, "obtainedYear", v)} />
+          </div>
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function CertificationsSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: CertificationItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      certifications: [...p.certifications, { name: "", organization: "", year: "", url: "" }],
+    }));
+  };
+
+  const update = (index: number, field: keyof CertificationItem, value: string) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      certifications: p.certifications.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      certifications: p.certifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Certifications" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="Nom" value={item.name} onChange={(v) => update(index, "name", v)} />
+            <Input label="Organisme" value={item.organization ?? ""} onChange={(v) => update(index, "organization", v)} />
+            <Input label="Année" value={item.year ?? ""} onChange={(v) => update(index, "year", v)} />
+            <Input label="URL" value={item.url ?? ""} onChange={(v) => update(index, "url", v)} />
+          </div>
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function CardsSection({
+  title,
+  items,
+  field,
+  setProfile,
+  setSaved,
+}: {
+  title: string;
+  items: ProfileCard[];
+  field: "interests" | "traits";
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      [field]: [...p[field], { title: "", description: "", icon: "" }],
+    }));
+  };
+
+  const update = (index: number, key: keyof ProfileCard, value: string) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      [field]: p[field].map((item, i) =>
+        i === index ? { ...item, [key]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      [field]: p[field].filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title={title} onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="Titre" value={item.title} onChange={(v) => update(index, "title", v)} />
+            <IconPicker value={item.icon} onChange={(v) => update(index, "icon", v)} />
+          </div>
+
+          <Textarea label="Description" value={item.description} onChange={(v) => update(index, "description", v)} />
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
+function TimelineSection({
+  items,
+  setProfile,
+  setSaved,
+}: {
+  items: TimelineItem[];
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  setSaved: (value: boolean) => void;
+}) {
+  const add = () => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      timeline: [...p.timeline, { date: "", title: "", text: "", isCurrent: false }],
+    }));
+  };
+
+  const update = (index: number, field: keyof TimelineItem, value: string | boolean) => {
+    setSaved(false);
+    setProfile((p) => ({
+      ...p,
+      timeline: p.timeline.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const remove = (index: number) => {
+    setProfile((p) => ({
+      ...p,
+      timeline: p.timeline.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <DynamicBlock title="Parcours" onAdd={add}>
+      {items.map((item, index) => (
+        <ItemCard key={index} onRemove={() => remove(index)}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="Période" value={item.date} onChange={(v) => update(index, "date", v)} />
+            <Input label="Titre" value={item.title} onChange={(v) => update(index, "title", v)} />
+          </div>
+
+          <Textarea label="Description" value={item.text} onChange={(v) => update(index, "text", v)} />
+
+          <label className="mt-3 flex items-center gap-2 text-sm font-bold">
+            <input
+              type="checkbox"
+              checked={item.isCurrent}
+              onChange={(e) => update(index, "isCurrent", e.target.checked)}
+            />
+            En cours
+          </label>
+        </ItemCard>
+      ))}
+    </DynamicBlock>
+  );
+}
+
 function Section({
-  icon,
   title,
   description,
   children,
-  action,
 }: {
-  icon: React.ReactNode;
   title: string;
   description: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <section className="rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg md:p-8">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div className="flex gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100">
-            {icon}
-          </div>
+    <section>
+      <h2 className="text-2xl font-black">{title}</h2>
+      <p className="mt-1 text-sm text-zinc-500">{description}</p>
+      <div className="mt-6">{children}</div>
+    </section>
+  );
+}
 
-          <div>
-            <h2 className="text-2xl font-black">{title}</h2>
-            <p className="mt-1 text-sm text-zinc-500">{description}</p>
-          </div>
-        </div>
+function DynamicBlock({
+  title,
+  onAdd,
+  children,
+}: {
+  title: string;
+  onAdd: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="mb-8">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-2xl font-black">{title}</h2>
 
-        {action}
+        <button
+          onClick={onAdd}
+          className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white"
+        >
+          <Plus className="h-4 w-4" />
+          Ajouter
+        </button>
       </div>
 
-      {children}
+      <div className="space-y-4">{children}</div>
     </section>
+  );
+}
+
+function ItemCard({
+  children,
+  onRemove,
+}: {
+  children: ReactNode;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-zinc-100 bg-zinc-50 p-5">
+      {children}
+
+      <button
+        onClick={onRemove}
+        className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-500"
+      >
+        <Trash2 className="h-4 w-4" />
+        Supprimer
+      </button>
+    </div>
   );
 }
 
@@ -437,14 +833,9 @@ function Input({
 }) {
   return (
     <label className="block">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-sm font-bold text-zinc-700">{label}</span>
-        {required && (
-          <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-bold text-teal-700">
-            obligatoire
-          </span>
-        )}
-      </div>
+      <span className="mb-2 block text-sm font-bold text-zinc-700">
+        {label} {required && <span className="text-teal-600">*</span>}
+      </span>
 
       <input
         type={type}
@@ -468,113 +859,54 @@ function Textarea({
   required?: boolean;
 }) {
   return (
-    <label className="mt-5 block">
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-sm font-bold text-zinc-700">{label}</span>
-        {required && (
-          <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-bold text-teal-700">
-            obligatoire
-          </span>
-        )}
-      </div>
+    <label className="mt-4 block">
+      <span className="mb-2 block text-sm font-bold text-zinc-700">
+        {label} {required && <span className="text-teal-600">*</span>}
+      </span>
 
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={5}
+        rows={4}
         className="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 font-medium outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
       />
     </label>
   );
 }
 
-function CardsSection({
-  title,
-  description,
-  items,
-  onAdd,
-  onRemove,
-  onChange,
-}: {
-  title: string;
-  description: string;
-  items: ProfileCard[];
-  onAdd: () => void;
-  onRemove: (index: number) => void;
-  onChange: (index: number, field: keyof ProfileCard, value: string) => void;
-}) {
-  return (
-    <Section
-      icon={<Sparkles className="h-5 w-5" />}
-      title={title}
-      description={description}
-      action={
-        <button
-          onClick={onAdd}
-          className="inline-flex items-center gap-2 rounded-xl bg-zinc-950 px-4 py-2 text-sm font-bold text-white"
-        >
-          <Plus className="h-4 w-4" />
-          Ajouter
-        </button>
-      }
-    >
-      <div className="space-y-4">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="rounded-[1.5rem] border border-zinc-100 bg-zinc-50 p-5"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <Input label="Titre" value={item.title} onChange={(v) => onChange(index, "title", v)} />
-              <IconPicker
-                value={item.icon}
-                onChange={(v) => onChange(index, "icon", v)}
-              />
-            </div>
-
-            <Textarea label="Description" value={item.description} onChange={(v) => onChange(index, "description", v)} />
-
-            <button
-              onClick={() => onRemove(index)}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-red-500"
-            >
-              <Trash2 className="h-4 w-4" />
-              Supprimer
-            </button>
-          </div>
-        ))}
-      </div>
-    </Section>
-  );
-}
-function LinkedInIcon() {
-  return (
-    <svg className="h-4 w-4 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-    </svg>
-  );
-}
-
-function GitHubIcon() {
-  return (
-    <svg className="h-4 w-4 text-zinc-800" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-    </svg>
-  );
-}
-function PreviewLine({
-  icon,
+function Select({
+  label,
   value,
+  onChange,
+  children,
 }: {
-  icon: React.ReactNode;
+  label: string;
   value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 px-4 py-3">
-      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-zinc-700 [&>svg]:h-4 [&>svg]:w-4">
-        {icon}
+    <label className="mt-4 block">
+      <span className="mb-2 block text-sm font-bold text-zinc-700">
+        {label}
       </span>
-      <span className="truncate font-semibold">{value}</span>
+
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 font-medium outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function Preview({ icon, value }: { icon: ReactNode; value: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 px-4 py-3 text-sm">
+      <span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span>
+      <span className="truncate font-semibold text-zinc-600">{value}</span>
     </div>
   );
 }

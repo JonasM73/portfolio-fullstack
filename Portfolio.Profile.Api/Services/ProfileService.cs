@@ -80,7 +80,57 @@ public async Task<bool> DeleteByAuthUserIdAsync(string authUserId)
         profile.WorkTitle = request.WorkTitle;
         profile.Company = request.Company;
         profile.GraduationYear = request.GraduationYear;
+        profile.Education = request.Education
+            .Select(e => new EducationItem
+            {
+                School = e.School,
+                Degree = e.Degree,
+                Field = e.Field,
+                Level = e.Level,
+                StartYear = e.StartYear,
+                EndYear = e.EndYear,
+                Status = e.Status,
+                Description = e.Description
+            })
+            .ToList();
 
+        profile.Licenses = request.Licenses
+            .Select(l => new LicenseItem
+            {
+                Name = l.Name,
+                Status = l.Status,
+                ObtainedYear = l.ObtainedYear
+            })
+            .ToList();
+
+        profile.Languages = request.Languages
+            .Select(l => new LanguageItem
+            {
+                Name = l.Name,
+                Level = l.Level,
+                Score = l.Score,
+                Description = l.Description
+            })
+            .ToList();
+
+        profile.Certifications = request.Certifications
+            .Select(c => new CertificationItem
+            {
+                Name = c.Name,
+                Organization = c.Organization,
+                Year = c.Year,
+                Url = c.Url
+            })
+            .ToList();
+
+        profile.Skills = request.Skills
+            .Select(s => new SkillItem
+            {
+                Name = s.Name,
+                Category = s.Category,
+                Level = s.Level
+            })
+            .ToList();
         profile.Interests = request.Interests
             .Select(i => new ProfileCard
             {
