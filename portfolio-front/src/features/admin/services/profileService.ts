@@ -105,6 +105,10 @@ export const profileService = {
 
     return response.data;
   },
+  getPublic: async () => {
+    const response = await profileApi.get<UserProfile>("/profile/public");
+    return response.data;
+  },
 
   updateMe: async (
     data: UserProfile
