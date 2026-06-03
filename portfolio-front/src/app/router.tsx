@@ -20,10 +20,10 @@ import AdminLoginPage from "../features/auth/pages/AdminLoginPage";
 import { ProtectedRoute } from "../features/auth/guards/ProtectedRoute";
 
 import AdminDashboardPage from "../features/admin/pages/AdminDashboardPage";
-import AdminProjectPage from "../features/admin/pages/projet/AdminProjectPage";
-import AdminProjectCreatePage from "../features/admin/pages/projet/AdminProjectCreatePage";
+import AdminProjectPage from "../features/admin/pages/project/AdminProjectPage";
+import AdminProjectCreatePage from "../features/admin/pages/project/AdminProjectCreatePage";
 import AdminUsersPage from "../features/admin/pages/AdminUsersPage";
-import AdminProjectEditPage from "../features/admin/pages/projet/AdminProjectEditPage";
+import AdminProjectEditPage from "../features/admin/pages/project/AdminProjectEditPage";
 import AdminProfilePage from "../features/admin/pages/AdminProfilePage";
 
 

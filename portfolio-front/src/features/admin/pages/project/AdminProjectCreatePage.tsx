@@ -15,14 +15,14 @@ import {
   X,
 } from "lucide-react";
 
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
-import { projectService } from "../services/projectService";
+import { projectService } from "../../services/projectService";
 import type {
   ProjectFile,
   ProjectForm,
-} from "../types/project.types";
+} from "../../types/project.types";
 
 export default function AdminProjectCreatePage() {
   const navigate = useNavigate();
