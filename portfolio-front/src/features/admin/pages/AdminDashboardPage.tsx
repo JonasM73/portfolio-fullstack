@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Plus, LogOut, Users, FolderKanban, Settings } from "lucide-react";
+import { LogOut, Users, FolderKanban, Settings } from "lucide-react";
 
 import { useAuth } from "../../auth/context/AuthContext";
 
@@ -81,9 +81,11 @@ export default function AdminDashboardPage() {
               Modifier les informations publiques du site.
             </p>
 
-            <Button className="mt-5 rounded-xl" disabled>
-              Bientôt disponible
-            </Button>
+            <Link to="/admin/profile">
+              <Button className="mt-5 rounded-xl">
+                Modifier mon profil
+              </Button>
+            </Link>
           </Card>
         </div>
       </div>

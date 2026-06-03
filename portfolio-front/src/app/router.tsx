@@ -24,6 +24,7 @@ import AdminProjectPage from "../features/admin/pages/AdminProjectPage";
 import AdminProjectCreatePage from "../features/admin/pages/AdminProjectCreatePage";
 import AdminUsersPage from "../features/admin/pages/AdminUsersPage";
 import AdminProjectEditPage from "../features/admin/pages/AdminProjectEditPage";
+import AdminProfilePage from "../features/admin/pages/AdminProfilePage";
 
 
 export function AppRouter() {
@@ -35,6 +36,7 @@ export function AppRouter() {
 
         {/* ADMIN */}
         <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
+        <Route path="/admin/profile" element={<ProtectedRoute><AdminProfilePage /></ProtectedRoute>} />
         <Route path="/admin/projects" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
         <Route path="/admin/projects/page" element={<ProtectedRoute><AdminProjectPage /></ProtectedRoute>} />
         <Route path="/admin/projects/new" element={<ProtectedRoute><AdminProjectCreatePage /></ProtectedRoute>} />
