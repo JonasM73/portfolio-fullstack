@@ -28,11 +28,13 @@ import AdminProfilePage from "../features/admin/pages/AdminProfilePage";
 import ForgotPasswordPage from "../features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "../features/auth/pages/ResetPasswordPage";
 import ScrollToTop from "../components/layout/ScrollToTop";
+import ScrollToTopButton from "../components/layout/ScrollToTopButton";
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <ScrollToTopButton />
       <Routes>
         {/* AUTH */}
         <Route path="/admin/login" element={<AdminLoginPage />} />
