@@ -225,11 +225,11 @@ Jwt__Issuer=Portfolio.Auth.Api
 Jwt__Audience=Portfolio.Admin
 
 # Azure Blob Storage
-AzureBlobStorage__ConnectionString=DefaultEndpointsProtocol=https;...
+AzureBlobStorage__ConnectionString="<YOUR_AZURE_BLOB_CONNECTION_STRING>"
 AzureBlobStorage__ContainerName=portfolio-projects
 
 # Email (Resend)
-Resend__ApiKey=re_xxxxxxxxxx
+Resend__ApiKey="<YOUR_RESEND_API_KEY>"
 Resend__FromEmail=noreply@yourdomain.com
 
 # CORS (Development)

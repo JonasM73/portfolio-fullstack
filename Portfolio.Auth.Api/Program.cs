@@ -71,7 +71,6 @@ builder.Services.AddSingleton(sp =>
 });
 
 var jwtKey = builder.Configuration["Jwt:Key"];
-
 if (string.IsNullOrWhiteSpace(jwtKey))
     throw new InvalidOperationException("JWT key is missing.");
 
