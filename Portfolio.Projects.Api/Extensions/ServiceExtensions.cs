@@ -57,7 +57,8 @@ public static class ServiceExtensions
                     ValidAudience = audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtKey!)
-                    )
+                    ),
+                    ClockSkew = TimeSpan.Zero
                 };
             });
 
