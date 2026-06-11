@@ -129,40 +129,43 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapPost("/api/auth/setup", async (
-    SetupAdminRequest request,
-    AuthService authService,
-    ProfileClient profileClient) =>
+if (app.Environment.IsDevelopment())
 {
-    var result =
-        await authService.CreateFirstAdminAsync(request);
-
-    if (!result.Success)
+    app.MapPost("/api/auth/setup", async (
+        SetupAdminRequest request,
+        AuthService authService,
+        ProfileClient profileClient) =>
     {
-        return Results.Conflict(new
+        var result =
+            await authService.CreateFirstAdminAsync(request);
+
+        if (!result.Success)
+        {
+            return Results.Conflict(new
+            {
+                message = result.Message
+            });
+        }
+
+        var admin =
+            await authService.GetUserByEmailAsync(
+                request.Email
+            );
+
+        if (admin is not null)
+        {
+            await profileClient.CreateProfileAsync(
+                admin.Id.ToString(),
+                admin.Email
+            );
+        }
+
+        return Results.Ok(new
         {
             message = result.Message
         });
-    }
-
-    var admin =
-        await authService.GetUserByEmailAsync(
-            request.Email
-        );
-
-    if (admin is not null)
-    {
-        await profileClient.CreateProfileAsync(
-            admin.Id.ToString(),
-            admin.Email
-        );
-    }
-
-    return Results.Ok(new
-    {
-        message = result.Message
     });
-});
+}
 
 app.MapPost("/api/auth/login", async (
     LoginRequest request,
