@@ -11,6 +11,11 @@ import {
   ShieldCheck,
   Sparkles,
   Calendar,
+  Server,
+  Database,
+  Layers3,
+  Wrench,
+  BrainCircuit,
 } from "lucide-react";
 
 import {
@@ -20,7 +25,6 @@ import {
 
 export default function AboutPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-
   useEffect(() => {
     profileService.getPublic().then(setProfile);
   }, []);
@@ -48,6 +52,7 @@ export default function AboutPage() {
       </main>
     );
   }
+    const skillsByCategory = groupSkillsByCategory(profile.skills ?? []);
 
   const fullName = `${profile.firstName} ${profile.lastName}`;
 
@@ -177,13 +182,38 @@ export default function AboutPage() {
       <Wave />
 
       <section className="relative z-10 bg-zinc-950 py-20 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-6 lg:grid-cols-4">
-          <Stat label="Formations" value={`${profile.education?.length ?? 0}`} />
-          <Stat label="Compétences" value={`${profile.skills?.length ?? 0}`} />
-          <Stat label="Langues" value={`${profile.languages?.length ?? 0}`} />
-          <Stat label="Permis" value={`${profile.licenses?.length ?? 0}`} />
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat
+            icon={<GraduationCap className="h-6 w-6" />}
+            label="Formations"
+            value={`${profile.education?.length ?? 0}`}
+            description="Parcours académique"
+          />
+
+          <Stat
+            icon={<Code2 className="h-6 w-6" />}
+            label="Compétences"
+            value={`${profile.skills?.length ?? 0}`}
+            description="Stack technique"
+          />
+
+          <Stat
+            icon={<Languages className="h-6 w-6" />}
+            label="Langues"
+            value={`${profile.languages?.length ?? 0}`}
+            description="Communication"
+          />
+
+          <Stat
+            icon={<ShieldCheck className="h-6 w-6" />}
+            label="Permis"
+            value={`${profile.licenses?.length ?? 0}`}
+            description="Mobilité"
+          />
         </div>
-      </section>
+      </div>
+    </section>
 
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <SectionTitle
@@ -225,32 +255,74 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="relative z-10 bg-white/60 py-20">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionTitle
-            eyebrow="Compétences"
-            title="Un profil entre développement, data et architecture."
-            subtitle="Technologies, domaines et outils utilisés dans mes projets."
-          />
 
-          <div className="mt-10 flex flex-wrap gap-3">
-            {profile.skills?.map((skill, index) => (
-              <div
-                key={index}
-                className="group rounded-full border border-zinc-200 bg-[#F8F6F2] px-5 py-3 shadow-sm transition hover:-translate-y-1 hover:bg-zinc-950 hover:text-white"
-              >
-                <div className="flex items-center gap-3">
-                  <Code2 className="h-4 w-4 text-teal-600 group-hover:text-teal-300" />
-                  <span className="font-black">{skill.name.trim()}</span>
-                  <span className="text-sm font-bold text-zinc-400 group-hover:text-white/50">
-                    {skill.category.trim()} • {skill.level}/5
-                  </span>
+          <section className="relative z-10 bg-white/70 py-24">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionTitle
+              eyebrow="Compétences"
+              title="Un socle technique structuré par domaines."
+              subtitle="Développement, data, architecture, cybersécurité et outils utilisés dans mes projets."
+            />
+
+            <div className="mt-12 grid gap-6 lg:grid-cols-2">
+              {skillsByCategory.map(([category, skills]) => (
+                <div
+                  key={category}
+                  className="group relative overflow-hidden rounded-[2rem] border border-zinc-100 bg-white p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl"
+                >
+                  <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-teal-100/70 blur-2xl transition group-hover:bg-teal-200" />
+
+                  <div className="relative flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-950 text-white shadow-lg">
+                        {getSkillCategoryIcon(category)}
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-black text-zinc-900">
+                          {category}
+                        </h3>
+                        <p className="mt-1 text-sm font-bold text-zinc-400">
+                          {skills.length} compétence{skills.length > 1 ? "s" : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-black text-zinc-500">
+                      {Math.round(
+                        skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length
+                      )}
+                      /5
+                    </span>
+                  </div>
+
+                  <div className="relative mt-6 space-y-4">
+                    {skills.map((skill, index) => (
+                      <div key={`${skill.name}-${index}`}>
+                        <div className="mb-2 flex items-center justify-between gap-4">
+                          <p className="font-black text-zinc-800">
+                            {skill.name}
+                          </p>
+
+                          <p className="text-xs font-black text-zinc-400">
+                            {skill.level}/5
+                          </p>
+                        </div>
+
+                        <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
+                          <div
+                            className="h-full rounded-full bg-zinc-950 transition-all duration-700"
+                            style={{ width: `${(skill.level / 5) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       <section className="relative z-10 mx-auto grid max-w-7xl gap-8 px-6 py-20 lg:grid-cols-2">
         <div className="rounded-[3rem] bg-gradient-to-br from-teal-500 to-zinc-950 p-8 text-white shadow-2xl">
@@ -357,11 +429,40 @@ function DarkLine({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  icon,
+  label,
+  value,
+  description,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  description: string;
+}) {
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-      <p className="text-5xl font-black">{value}</p>
-      <p className="mt-2 text-sm font-bold text-white/50">{label}</p>
+    <div className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 shadow-2xl backdrop-blur transition hover:-translate-y-1 hover:bg-white/[0.09]">
+      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-teal-400/20 blur-2xl transition group-hover:bg-teal-400/30" />
+
+      <div className="relative flex items-center justify-between">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-teal-300 ring-1 ring-white/10">
+          {icon}
+        </div>
+
+        <p className="text-5xl font-black tracking-tight">
+          {value}
+        </p>
+      </div>
+
+      <div className="relative mt-6">
+        <p className="text-lg font-black">
+          {label}
+        </p>
+
+        <p className="mt-1 text-sm font-bold text-white/45">
+          {description}
+        </p>
+      </div>
     </div>
   );
 }
@@ -438,4 +539,44 @@ function formatStatus(status: string) {
   };
 
   return map[status] ?? status;
+}
+function groupSkillsByCategory(skills: UserProfile["skills"]) {
+  const order = [
+    "Frontend",
+    "Backend",
+    "Data",
+    "Business Intelligence",
+    "Cybersécurité",
+    "DevOps",
+    "Architecture",
+    "Base de données",
+    "Outils",
+    "Autre",
+  ];
+
+  const grouped = skills.reduce<Record<string, typeof skills>>((acc, skill) => {
+    const category = skill.category || "Autre";
+
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(skill);
+
+    return acc;
+  }, {});
+
+  return order
+    .filter((category) => grouped[category]?.length)
+    .map((category) => [category, grouped[category]] as const);
+}
+
+function getSkillCategoryIcon(category: string) {
+  if (category === "Frontend") return <Code2 className="h-6 w-6" />;
+  if (category === "Backend") return <Server className="h-6 w-6" />;
+  if (category === "Data") return <Database className="h-6 w-6" />;
+  if (category === "Business Intelligence") return <BrainCircuit className="h-6 w-6" />;
+  if (category === "Cybersécurité") return <ShieldCheck className="h-6 w-6" />;
+  if (category === "DevOps") return <Wrench className="h-6 w-6" />;
+  if (category === "Architecture") return <Layers3 className="h-6 w-6" />;
+  if (category === "Base de données") return <Database className="h-6 w-6" />;
+
+  return <Sparkles className="h-6 w-6" />;
 }

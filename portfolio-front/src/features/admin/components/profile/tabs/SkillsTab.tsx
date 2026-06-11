@@ -77,23 +77,18 @@ export function SkillsTab({
   const addSkill = () => {
     setSaved(false);
 
-    setProfile((p) => {
-      const newIndex = p.skills.length;
+    const newSkill = {
+      name: "",
+      category: "Frontend",
+      level: 3,
+    };
 
-      setOpenIndex(newIndex);
+    setProfile((p) => ({
+      ...p,
+      skills: [newSkill, ...p.skills], // ajoute EN HAUT
+    }));
 
-      return {
-        ...p,
-        skills: [
-          ...p.skills,
-          {
-            name: "",
-            category: "Frontend",
-            level: 3,
-          },
-        ],
-      };
-    });
+    setOpenIndex(0); // ouvre automatiquement la nouvelle compétence
   };
 
   const updateSkill = (
