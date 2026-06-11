@@ -35,6 +35,12 @@ appsettings.Local.json
 appsettings.*.Local.json
 appsettings.*.local.json
 start-dev.ps1
+_start-dev.ps1
+secrets.json
+*.pfx
+*.pem
+*.key
+*.crt
 
 # Logs
 *.log
@@ -50,3 +56,4 @@ structure.txt
 # Local docs / notes if private
 Compte.md
 SECURITY_CHECKLIST_PRIVATE.md
+
