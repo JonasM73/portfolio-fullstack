@@ -29,7 +29,7 @@ public class AuthEmailService
         if (string.IsNullOrWhiteSpace(apiKey))
             throw new InvalidOperationException("Resend API key is missing.");
 
-        var resetLink = !string.IsNullOrWhiteSpace(frontendUrl)
+        var resetLink =!string.IsNullOrWhiteSpace(frontendUrl)
             ? $"{frontendUrl}/admin/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}"
             : null;
 
