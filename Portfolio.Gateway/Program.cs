@@ -37,10 +37,27 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// CORS ici
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Content-Security-Policy"] =
+        "default-src 'self'; " +
+        "img-src 'self' data: https://portfoliojonas.blob.core.windows.net; " +
+        "script-src 'self'; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self' https://portfoliojonas.blob.core.windows.net; " +
+        "frame-ancestors 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self'";
+
+        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+
+    await next();
+});
+
 app.UseCors("AllowFrontend");
 
-// Endpoint test
 app.MapGet("/", () =>
 {
     return Results.Ok(new
