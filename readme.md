@@ -28,7 +28,9 @@ This platform includes a **public portfolio website**, a **secure admin dashboar
 ## 📁 Project Management (Admin Only)
 - **Create, edit, delete projects** with full CRUD operations
 - **Rich text editor** (TipTap) for project descriptions
-- **Image & document uploads** to Azure Blob Storage (max 100 MB per file)
+- Upload limits:
+-- Images: 10 MB max
+-- PDF documents: 50 MB max
 - Project metadata: technologies, roles, team size, dates
 - GitHub repository & demo URL links
 - Project publishing & featuring

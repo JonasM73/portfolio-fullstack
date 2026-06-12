@@ -21,8 +21,10 @@ builder.AddNpmApp(
         scriptName: "dev"
     )
     .WithHttpEndpoint(
-        name: "http",
-        env: "PORT"
+        port: 5173,
+        targetPort: 5173,
+        name: "https",
+        isProxied: false
     )
     .WithExternalHttpEndpoints();
     
