@@ -51,7 +51,7 @@ app.Use(async (context, next) =>
         "form-action 'self'";
 
         context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-
+        context.Response.Headers["X-Frame-Options"] = "DENY";
 
     await next();
 });
