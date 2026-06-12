@@ -9,14 +9,25 @@ builder.Services.AddControllers();
 
 builder.Services.AddSingleton<ProfileService>();
 builder.Services.AddSingleton<ProfileBlobStorageService>();
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
+
+if (!builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
+{
+    throw new InvalidOperationException(
+        "CORS configuration missing: Cors:AllowedOrigins must contain the production frontend domain."
+    );
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCors", policy =>
     {
         policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+            .WithOrigins(allowedOrigins)
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization");
     });
 });
 
