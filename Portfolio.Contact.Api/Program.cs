@@ -103,7 +103,7 @@ app.MapPost("/api/contact", async (
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Erreur Resend : {ex.Message}");
+        app.Logger.LogError(ex, "Erreur lors de l’envoi de l’email via Resend.");
     }
 
     return Results.Created($"/api/contact/{message.Id}", new
