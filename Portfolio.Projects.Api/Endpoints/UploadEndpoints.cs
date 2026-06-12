@@ -1,5 +1,6 @@
 using Portfolio.Projects.Api.Models;
 using Portfolio.Projects.Api.Services;
+using Portfolio.Projects.Api.Security;
 
 namespace Portfolio.Projects.Api.Endpoints;
 
@@ -15,9 +16,17 @@ public static class UploadEndpoints
 
     private static readonly string[] AllowedDocumentExtensions =
     [
-        ".pdf", ".doc", ".docx", ".ppt", ".pptx"
+        ".pdf"
+    ];
+    private static readonly string[] AllowedImageMimeTypes =
+    [
+        "image/png", "image/jpeg", "image/webp"
     ];
 
+    private static readonly string[] AllowedDocumentMimeTypes =
+    [
+        "application/pdf"
+    ];
     public static void MapUploadEndpoints(this WebApplication app)
     {
         app.MapPost("/api/uploads/projects", async (
@@ -35,8 +44,26 @@ public static class UploadEndpoints
             if (!isImage && !isDocument)
             {
                 return Results.BadRequest(
-                    "Format invalide. Formats autorisés : png, jpg, jpeg, webp, pdf, doc, docx, ppt, pptx."
+                    "Format invalide. Formats autorisés : pdf"
                 );
+            }
+            var allowedExtensions = isImage
+                ? AllowedImageExtensions
+                : AllowedDocumentExtensions;
+
+            var allowedMimeTypes = isImage
+                ? AllowedImageMimeTypes
+                : AllowedDocumentMimeTypes;
+
+            var isValidFile = await FileSignatureValidator.IsValidAsync(
+                file,
+                allowedExtensions,
+                allowedMimeTypes
+            );
+
+            if (!isValidFile)
+            {
+                return Results.BadRequest("Type de fichier invalide.");
             }
 
             if (isImage && file.Length > MaxImageSize)

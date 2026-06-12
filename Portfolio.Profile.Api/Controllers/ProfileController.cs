@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Portfolio.Profile.Api.Dtos;
 using Portfolio.Profile.Api.Services;
 using Portfolio.Profile.Api.Models;
+using Portfolio.Profile.Api.Security;
+
 namespace Portfolio.Profile.Api.Controllers;
 
 [ApiController]
@@ -32,8 +34,25 @@ public class ProfileController : ControllerBase
         if (file is null || file.Length == 0)
             return BadRequest(new { message = "Aucun fichier envoyé." });
 
-        if (!file.ContentType.StartsWith("image/"))
-            return BadRequest(new { message = "Le fichier doit être une image." });
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+        var allowedMimeTypes = new[]
+        {
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        };
+
+        var isValidFile = await FileSignatureValidator.IsValidAsync(
+            file,
+            allowedExtensions,
+            allowedMimeTypes
+        );
+
+        if (!isValidFile)
+        {
+            return BadRequest("Type de fichier invalide.");
+        }
 
         var avatar = await _blobStorageService.UploadAvatarAsync(
             file,
