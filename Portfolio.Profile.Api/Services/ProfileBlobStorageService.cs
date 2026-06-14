@@ -22,7 +22,7 @@ public class ProfileBlobStorageService
 
     public async Task<ProfileFile> UploadAvatarAsync(IFormFile file, string authUserId)
     {
-        var extension = Path.GetExtension(file.FileName);
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         var fileName = $"profiles/{authUserId}/avatar-{Guid.NewGuid()}{extension}";
 
         var blobClient = _containerClient.GetBlobClient(fileName);
