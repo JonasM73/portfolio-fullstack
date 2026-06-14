@@ -219,8 +219,7 @@ Create `.env` files or set system variables:
 
 ```env
 # Database
-MongoDb__ConnectionString=mongodb://localhost:27017
-
+MongoDb__ConnectionString=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
 # JWT Authentication
 Jwt__Key=your-super-secret-key-min-32-chars
 Jwt__Issuer=Portfolio.Auth.Api
