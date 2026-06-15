@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddRateLimiter(options =>
 {
+    
     options.AddFixedWindowLimiter("AuthLoginLimiter", limiterOptions =>
     {
         limiterOptions.PermitLimit = 5;
@@ -20,12 +22,19 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.QueueLimit = 0;
     });
     options.AddFixedWindowLimiter("ForgotPasswordLimiter", limiterOptions =>
-{
-    limiterOptions.PermitLimit = 3;
-    limiterOptions.Window = TimeSpan.FromMinutes(15);
-    limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-    limiterOptions.QueueLimit = 0;
-});
+    {
+        limiterOptions.PermitLimit = 3;
+        limiterOptions.Window = TimeSpan.FromMinutes(15);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
+    options.AddFixedWindowLimiter("ResetPasswordLimiter", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(15);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
@@ -413,5 +422,5 @@ app.MapPost("/api/auth/reset-password", async (
     return result.Success
         ? Results.Ok(new { message = result.Message })
         : Results.BadRequest(new { message = result.Message });
-});
+}).RequireRateLimiting("ResetPasswordLimiter");
 app.Run();
