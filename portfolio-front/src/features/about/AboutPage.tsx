@@ -400,14 +400,6 @@ export default function AboutPage() {
   );
 }
 
-function Pill({ icon, text }: { icon?: React.ReactNode; text: string }) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/80 px-4 py-2 text-sm font-bold text-zinc-700 shadow-sm backdrop-blur [&>svg]:h-4 [&>svg]:w-4">
-      {icon}
-      {text}
-    </div>
-  );
-}
 
 function DarkLine({
   icon,

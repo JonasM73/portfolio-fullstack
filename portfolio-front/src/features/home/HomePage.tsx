@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Briefcase,
-  Code2,
   Cake,
   GraduationCap,
   LogOut,
@@ -229,7 +228,7 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="group relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-2 hover:bg-white/10 hover:shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
@@ -297,20 +296,7 @@ export default function HomePage() {
   );
 }
 
-function Pill({
-  icon,
-  text,
-}: {
-  icon?: React.ReactNode;
-  text: string;
-}) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 shadow-sm [&>svg]:h-4 [&>svg]:w-4">
-      {icon}
-      {text}
-    </div>
-  );
-}
+
 function getAge(date?: string | Date | null) {
   if (!date) return null;
 

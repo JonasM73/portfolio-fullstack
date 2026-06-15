@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   AtSign,
-  Calendar,
   ImagePlus,
   Loader2,
   MapPin,
