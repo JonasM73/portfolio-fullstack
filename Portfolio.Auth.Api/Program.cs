@@ -19,6 +19,13 @@ builder.Services.AddRateLimiter(options =>
         limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         limiterOptions.QueueLimit = 0;
     });
+    options.AddFixedWindowLimiter("ForgotPasswordLimiter", limiterOptions =>
+{
+    limiterOptions.PermitLimit = 3;
+    limiterOptions.Window = TimeSpan.FromMinutes(15);
+    limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    limiterOptions.QueueLimit = 0;
+});
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
@@ -382,7 +389,7 @@ app.MapPost("/api/auth/forgot-password", async (
     {
         message = result.Message
     });
-});
+}).RequireRateLimiting("ForgotPasswordLimiter");
 
 app.MapPost("/api/auth/reset-password", async (
     ResetPasswordRequest request,
