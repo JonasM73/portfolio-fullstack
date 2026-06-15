@@ -1,10 +1,23 @@
 using MongoDB.Driver;
 using Portfolio.Contact.Api.Dtos;
 using Portfolio.Contact.Api.Models;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("ContactLimiter", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
 
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -61,6 +74,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
+app.UseRateLimiter();
 
 app.MapPost("/api/contact", async (
     ContactCreateRequest request,
@@ -126,7 +140,8 @@ app.MapPost("/api/contact", async (
         message.ProjectTitle,
         message.CreatedAt
     });
-});
+})
+.RequireRateLimiting("ContactLimiter");
 
 app.MapGet("/api/contact/messages", async (
     IMongoCollection<ContactMessage> collection) =>
