@@ -82,6 +82,10 @@ app.MapPost("/api/contact", async (
     IResend resend,
     IConfiguration configuration) =>
 {
+    if (!string.IsNullOrWhiteSpace(request.Website))
+    {
+        return Results.BadRequest("Bot détecté.");
+    }
     var message = new ContactMessage
     {
         Name = request.Name,
