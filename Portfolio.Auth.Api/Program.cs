@@ -6,9 +6,22 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Portfolio.Auth.Api.Dtos;
 using Portfolio.Auth.Api.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("AuthLoginLimiter", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        limiterOptions.QueueLimit = 0;
+    });
 
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -134,7 +147,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
-
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -185,7 +198,8 @@ app.MapPost("/api/auth/login", async (
     return result is null
         ? Results.Unauthorized()
         : Results.Ok(result);
-});
+})
+.RequireRateLimiting("AuthLoginLimiter");
 
 app.MapGet("/api/auth/me", (ClaimsPrincipal user) =>
 {
