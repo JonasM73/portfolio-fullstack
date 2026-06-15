@@ -3,6 +3,7 @@ using Portfolio.Contact.Api.Dtos;
 using Portfolio.Contact.Api.Models;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Portfolio.Contact.Api.Security;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,17 +87,24 @@ app.MapPost("/api/contact", async (
     {
         return Results.BadRequest("Bot détecté.");
     }
+
+    var validationError = ContactInputValidator.Validate(request);
+    if (validationError != null)
+    {
+        return Results.BadRequest(validationError);
+    }
+
+
     var message = new ContactMessage
     {
-        Name = request.Name,
-        Email = request.Email,
-        Subject = request.Subject,
-        Message = request.Message,
+        Name = ContactInputValidator.Sanitize(request.Name),
+        Email = ContactInputValidator.Sanitize(request.Email),
+        Subject = ContactInputValidator.Sanitize(request.Subject),
+        Message = ContactInputValidator.Sanitize(request.Message),
         ProjectId = request.ProjectId,
         ProjectTitle = request.ProjectTitle,
         CreatedAt = DateTime.UtcNow
     };
-
     await collection.InsertOneAsync(message);
 
     var from = configuration["Resend:From"]!;
