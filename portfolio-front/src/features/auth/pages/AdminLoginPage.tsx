@@ -28,10 +28,18 @@ export default function AdminLoginPage() {
       });
 
       navigate("/admin/projects");
-    } catch (error) {
-      console.error(error);
-      setError("Email ou mot de passe incorrect.");
-    } finally {
+    } catch (error: any) {
+    console.error(error);
+
+    if (error.response?.status === 429) {
+      setError("Trop de tentatives. Réessaie dans quelques minutes.");
+      return;
+    }
+
+    setError(
+      error.response?.data?.message ?? "Email ou mot de passe incorrect."
+    );
+  } finally {
       setIsSubmitting(false);
     }
   };

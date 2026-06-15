@@ -138,10 +138,40 @@ public class AuthService
         if (user is null)
             return null;
 
+        if (user.LockoutEnd.HasValue &&
+            user.LockoutEnd > DateTime.UtcNow)
+        {
+            throw new Exception(
+                "Compte temporairement bloqué pendant 15 minutes."
+            );
+        }
+
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
 
         if (!isPasswordValid)
+        {
+            var failedAttempts = user.FailedLoginAttempts + 1;
+
+            var update = failedAttempts >= 5
+                ? Builders<AppUser>.Update
+                    .Set(x => x.FailedLoginAttempts, 0)
+                    .Set(x => x.LockoutEnd, DateTime.UtcNow.AddMinutes(15))
+                    .Set(x => x.UpdatedAt, DateTime.UtcNow)
+                : Builders<AppUser>.Update
+                    .Set(x => x.FailedLoginAttempts, failedAttempts)
+                    .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+            await _users.UpdateOneAsync(x => x.Id == user.Id, update);
+
             return null;
+        }
+
+        var resetUpdate = Builders<AppUser>.Update
+            .Set(x => x.FailedLoginAttempts, 0)
+            .Unset(x => x.LockoutEnd)
+            .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+        await _users.UpdateOneAsync(x => x.Id == user.Id, resetUpdate);
 
         var token = _jwtService.GenerateToken(user);
 

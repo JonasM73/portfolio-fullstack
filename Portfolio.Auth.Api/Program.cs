@@ -200,11 +200,24 @@ app.MapPost("/api/auth/login", async (
     LoginRequest request,
     AuthService authService) =>
 {
-    var result = await authService.LoginAsync(request);
+    try
+    {
+        var result = await authService.LoginAsync(request);
 
-    return result is null
-        ? Results.Unauthorized()
-        : Results.Ok(result);
+        return result is null
+            ? Results.Json(
+                new { message = "Email ou mot de passe incorrect." },
+                statusCode: 401
+            )
+            : Results.Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new
+        {
+            message = ex.Message
+        });
+    }
 })
 .RequireRateLimiting("AuthLoginLimiter");
 

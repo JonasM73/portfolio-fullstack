@@ -31,4 +31,10 @@ public class AppUser
 
     [BsonElement("updatedAt")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    
+    [BsonElement("failedLoginAttempts")]
+    public int FailedLoginAttempts { get; set; }
+
+    [BsonElement("lockoutEnd")]
+    public DateTime? LockoutEnd { get; set; }
 }
