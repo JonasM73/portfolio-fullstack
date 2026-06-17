@@ -22,7 +22,7 @@ public class ProfileController : ControllerBase
         _profileService = profileService;
         _blobStorageService = blobStorageService;
     }
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPost("me/avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)
     {
@@ -69,6 +69,7 @@ public class ProfileController : ControllerBase
 
         return Ok(profile.Avatar);
     }
+    [Authorize(Roles = "Admin")]
     [HttpPost("create")]
     public async Task<IActionResult> CreateProfile(CreateProfileRequest request)
     {
@@ -79,6 +80,7 @@ public class ProfileController : ControllerBase
 
         return Ok(profile);
     }
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{authUserId}")]
 public async Task<IActionResult> DeleteProfile(string authUserId)
 {
@@ -118,7 +120,7 @@ public async Task<IActionResult> DeleteProfile(string authUserId)
         return Ok(profile);
     }
 
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMyProfile(UpdateProfileRequest request)
     {
