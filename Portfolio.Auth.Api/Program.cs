@@ -39,7 +39,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddSingleton<RefreshTokenService>();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo

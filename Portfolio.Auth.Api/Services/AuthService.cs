@@ -252,8 +252,10 @@ public class AuthService
             .Set(x => x.FullName, request.FullName)
             .Set(x => x.Role, role.ToString())
             .Set(x => x.UpdatedAt, DateTime.UtcNow);
-
-        await _users.UpdateOneAsync(x => x.Id.ToString() == id, update);
+            
+        if (!ObjectId.TryParse(id, out var objectId))
+            return (false, "Utilisateur introuvable.");
+        await _users.UpdateOneAsync(x => x.Id == objectId, update);
 
         return (true, "Utilisateur modifié avec succès.");
     }
@@ -272,8 +274,9 @@ public class AuthService
             if (adminCount <= 1)
                 return (false, "Impossible de supprimer le dernier administrateur.");
         }
-
-        await _users.DeleteOneAsync(x => x.Id.ToString() == id);
+        if (!ObjectId.TryParse(id, out var objectId))
+            return (false, "Utilisateur introuvable.");
+        await _users.DeleteOneAsync(x => x.Id == objectId  );
 
         return (true, "Utilisateur supprimé avec succès.");
     }
@@ -287,8 +290,10 @@ public class AuthService
 
         if (user.Role == UserRole.Admin.ToString())
             return (false, "Un administrateur ne peut pas supprimer son propre compte depuis cette route.");
-
-        await _users.DeleteOneAsync(x => x.Id.ToString() == userId);
+            
+        if (!ObjectId.TryParse(userId, out var objectId))
+            return (false, "Utilisateur introuvable.");
+        await _users.DeleteOneAsync(x => x.Id == objectId);
 
         return (true, "Compte supprimé avec succès.");
     }
@@ -319,7 +324,9 @@ public class AuthService
             .Set(x => x.PasswordHash, BCrypt.Net.BCrypt.HashPassword(request.NewPassword))
             .Set(x => x.UpdatedAt, DateTime.UtcNow);
 
-        await _users.UpdateOneAsync(x => x.Id.ToString() == userId, update);
+        if (!ObjectId.TryParse(userId, out var objectId))
+            return (false, "Utilisateur introuvable.");
+        await _users.UpdateOneAsync(x => x.Id == objectId, update);
 
         return (true, "Mot de passe modifié avec succès.");
     }

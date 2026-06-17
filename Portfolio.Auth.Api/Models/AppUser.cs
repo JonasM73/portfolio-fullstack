@@ -37,4 +37,8 @@ public class AppUser
 
     [BsonElement("lockoutEnd")]
     public DateTime? LockoutEnd { get; set; }
+
+    [BsonElement("refreshTokens")]
+    public List<RefreshToken> RefreshTokens { get; set; } = [];
+
 }
