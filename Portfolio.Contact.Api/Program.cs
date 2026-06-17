@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Portfolio.Contact.Api.Security;
 using Resend;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRateLimiter(options =>
@@ -64,7 +67,26 @@ builder.Services.Configure<ResendClientOptions>(options =>
     options.ApiToken = builder.Configuration["Resend:ApiKey"]!;
 });
 builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            ),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -76,7 +98,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 app.UseRateLimiter();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapPost("/api/contact", async (
     ContactCreateRequest request,
     IMongoCollection<ContactMessage> collection,
@@ -176,6 +199,8 @@ app.MapGet("/api/contact/messages", async (
     });
 
     return Results.Ok(response);
-});
+})
+.RequireAuthorization(policy =>
+    policy.RequireRole("Admin"));
 
 app.Run();
