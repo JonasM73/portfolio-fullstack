@@ -165,7 +165,7 @@ Create local environment variables.
 ### PowerShell
 
 ```powershell
-$env:MongoDb__ConnectionString="mongodb://localhost:27017"
+$env:MongoDb__ConnectionString="mongodb://username>:<password>@localhost:27017"
 
 $env:Jwt__Key="YOUR_SECRET_KEY"
 

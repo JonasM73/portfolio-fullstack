@@ -275,6 +275,12 @@ export default function ContactPage() {
               Envoyer le message
               <Send className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Button>
+            <p className="text-xs leading-5 text-zinc-500">
+              Les informations transmises via ce formulaire sont utilisées uniquement pour
+              répondre à votre demande. Elles peuvent être conservées jusqu’à 12 mois et ne
+              sont jamais revendues. Pour toute demande relative à vos données personnelles,
+              vous pouvez me contacter à l’adresse indiquée dans les mentions légales.
+            </p>
           </form>
         </Card>
       </section>

@@ -8,6 +8,7 @@ import {
   FileLock2,
   KeyRound,
   Mail,
+  Server,
   ShieldCheck,
   Trash2,
   UserCheck,
@@ -60,6 +61,19 @@ const sections = [
       </>
     ),
   },
+  {
+  icon: <Server />,
+  title: "Sous-traitants techniques",
+  content: (
+    <>
+      Certaines données peuvent être traitées par des prestataires techniques
+      nécessaires au fonctionnement du site : <strong>MongoDB Atlas</strong> pour
+      l’hébergement de la base de données, <strong>Azure Blob Storage</strong>{" "}
+      pour le stockage des fichiers et visuels, et <strong>Resend</strong> pour
+      l’envoi des notifications email liées au formulaire de contact.
+    </>
+  ),
+},
   {
     icon: <Clock />,
     title: "Durée de conservation",
