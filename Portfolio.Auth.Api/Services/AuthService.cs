@@ -3,6 +3,7 @@ using Portfolio.Auth.Api.Dtos;
 using Portfolio.Auth.Api.Models;
 using System.Security.Cryptography;
 using System.Text;
+using MongoDB.Bson;
 
 namespace Portfolio.Auth.Api.Services;
 
@@ -191,7 +192,12 @@ public class AuthService
 
     public async Task<AppUser?> GetUserByIdAsync(string id)
     {
-        return await _users.Find(x => x.Id.ToString() == id).FirstOrDefaultAsync();
+        if (!ObjectId.TryParse(id, out var objectId))
+            return null;
+
+        return await _users
+            .Find(x => x.Id == objectId)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<(bool Success, string Message)> CreateUserAsync(CreateUserRequest request)
