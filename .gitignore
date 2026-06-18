@@ -36,6 +36,8 @@ appsettings.*.Local.json
 appsettings.*.local.json
 start-dev.ps1
 _start-dev.ps1
+start-prod.ps1
+_start-prod.ps1
 secrets.json
 *.pfx
 *.pem
