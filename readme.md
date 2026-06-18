@@ -42,7 +42,24 @@ This platform includes a **public portfolio website**, a **secure admin dashboar
 - **Password security**: BCrypt hashing, 6+ chars with uppercase & numbers
 - **Password reset flow** with time-limited tokens
 - **Protected admin routes** - all modification endpoints require valid JWT + Admin role
-- First admin setup endpoint for initialization
+- First admin setup endpoint available only during initial deployment
+- Disabled or removed in production environments
+- Refresh Token rotation & server-side revocation
+- Login rate limiting
+- Forgot password rate limiting
+- Temporary account lockout after repeated failed login attempts
+- Protection against user enumeration
+- Generic authentication error messages
+
+## 🛡️ HTTP Security
+
+- Content Security Policy (CSP)
+- HSTS (Strict-Transport-Security)
+- X-Content-Type-Options: nosniff
+- X-Frame-Options: DENY
+- Referrer-Policy
+- Permissions-Policy
+- HTTPS enforced
 
 ## ☁️ Cloud Storage & Media
 - **Azure Blob Storage integration** for scalable file hosting
@@ -88,7 +105,10 @@ The application follows a **distributed microservices architecture** with API Ga
   │  Auth API   │    │ Projects API │    │ Profile API  │
   │ (7076)      │    │  (7057)      │    │  (7077)      │
   │ - JWT Gen   │    │ - CRUD Ops   │    │ - Avatar Mgmt│
-  │ - Register  │    │ - File Upload│    │ - Bio/Links  │
+  │ - Login     │    │ - File Upload│    │ - Bio/Links  │
+  │ - Refresh Tokens │              │    │              │
+  │ - Password Reset │              │    │              │
+  │ - User Management│              │    │              │
   │ - Reset Pwd │    │ - Publish    │    │              │
   └──────┬──────┘    └──────┬───────┘    └──────────────┘
          │                   │
@@ -295,12 +315,13 @@ Sensitive information is **never stored in the repository**.
 
 ### Authentication API (7076)
 ```
-POST   /auth/register        - Register new user
-POST   /auth/login           - Login & get JWT
-POST   /auth/refresh         - Refresh JWT token
-POST   /auth/password-reset  - Request password reset
-POST   /auth/reset-confirm   - Confirm password reset
-GET    /auth/me              - Get current user (protected)
+POST /auth/login
+POST /auth/refresh
+POST /auth/logout
+POST /auth/forgot-password
+POST /auth/reset-password
+GET  /auth/me
+PUT  /auth/change-password
 ```
 
 ### Projects API (7057)
@@ -344,6 +365,11 @@ GET    /contact/messages     - Get messages (admin)
 - [x] User profiles & avatars
 - [x] Password reset flow
 - [x] .NET Aspire orchestration
+- [x] Rate limiting & API throttling
+- [x] Refresh Token Security
+- [x] Password Reset Flow
+- [x] CSP & Security Headers
+- [x] Brute Force Protection
 
 ### 🔄 In Progress / Planned
 - [ ] User self-service portfolio customization
@@ -355,8 +381,31 @@ GET    /contact/messages     - Get messages (admin)
 - [ ] Multi-language support
 - [ ] Dark mode theme
 - [ ] Redis caching for performance
-- [ ] Rate limiting & API throttling
 
+# 🚀 Production Architecture
+
+Frontend
+- React 19
+- Vite Build
+
+Backend
+- .NET 9 Microservices
+- API Gateway Pattern
+
+Storage
+- MongoDB Atlas
+- Azure Blob Storage
+
+Email
+- Resend
+
+Security
+- JWT Authentication
+- Refresh Tokens
+- Role-Based Authorization
+- CSP
+- HSTS
+- Rate Limiting
 ---
 
 # 📸 Screenshots
@@ -394,10 +443,17 @@ mongosh
 
 # 👨‍💻 Author
 
-**Jonas MIONNET**
+Jonas MIONNET
 
-Software Engineering Student – CESI  
-Cybersecurity & Software Engineering Enthusiast
+Engineering Student at CESI
+Data Analyst Apprentice at Sogeti (Capgemini)
+
+Areas of Interest:
+- Software Engineering
+- Cloud Computing
+- Cybersecurity
+- Distributed Systems
+- Observability
 
 ---
 
