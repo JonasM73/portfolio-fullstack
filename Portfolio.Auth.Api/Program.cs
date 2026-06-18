@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddRateLimiter(options =>
 {
     
@@ -39,7 +39,6 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton<RefreshTokenService>();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -229,7 +228,35 @@ app.MapPost("/api/auth/login", async (
     }
 })
 .RequireRateLimiting("AuthLoginLimiter");
+app.MapPost("/api/auth/refresh", async (
+    RefreshTokenRequest request,
+    AuthService authService) =>
+{
+    if (string.IsNullOrWhiteSpace(request.RefreshToken))
+        return Results.BadRequest(new { message = "Refresh token manquant." });
 
+    var result = await authService.RefreshAsync(request.RefreshToken);
+
+    return result is null
+        ? Results.Json(
+            new { message = "Session expirée. Veuillez vous reconnecter." },
+            statusCode: 401
+        )
+        : Results.Ok(result);
+});
+
+app.MapPost("/api/auth/logout", async (
+    LogoutRequest request,
+    AuthService authService) =>
+{
+    if (!string.IsNullOrWhiteSpace(request.RefreshToken))
+        await authService.LogoutAsync(request.RefreshToken);
+
+    return Results.Ok(new
+    {
+        message = "Déconnexion réussie."
+    });
+});
 app.MapGet("/api/auth/me", (ClaimsPrincipal user) =>
 {
     var id = user.FindFirstValue(ClaimTypes.NameIdentifier);

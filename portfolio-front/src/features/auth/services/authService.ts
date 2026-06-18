@@ -7,30 +7,37 @@ import type {
 } from "../types/auth.types";
 
 export const authService = {
-  async login(
-    data: LoginRequest
-  ): Promise<LoginResponse> {
-    const response =
-      await api.post<LoginResponse>(
-        "/auth/login",
-        data
-      );
+  async login(data: LoginRequest): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>("/auth/login", data);
+    return response.data;
+  },
+
+  async refresh(refreshToken: string): Promise<LoginResponse> {
+    const response = await api.post<LoginResponse>("/auth/refresh", {
+      refreshToken,
+    });
 
     return response.data;
   },
 
   async me(): Promise<AuthUser> {
-    const response =
-      await api.get<AuthUser>(
-        "/auth/me"
-      );
-
+    const response = await api.get<AuthUser>("/auth/me");
     return response.data;
   },
 
-  logout() {
+  async logout() {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (refreshToken) {
+      await api.post("/auth/logout", {
+        refreshToken,
+      });
+    }
+
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
   },
+
   async forgotPassword(email: string) {
     const response = await api.post("/auth/forgot-password", {
       email,
@@ -46,7 +53,6 @@ export const authService = {
     newPassword: string;
   }) {
     const response = await api.post("/auth/reset-password", data);
-
     return response.data;
   },
 };

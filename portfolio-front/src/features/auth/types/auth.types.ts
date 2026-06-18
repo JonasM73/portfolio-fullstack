@@ -1,7 +1,4 @@
-export type UserRole =
-  | "Admin"
-  | "User"
-  | "Premium";
+export type UserRole = "Admin" | "User" | "Premium";
 
 export type LoginRequest = {
   email: string;
@@ -10,6 +7,7 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   token: string;
+  refreshToken: string;
   email: string;
   fullName: string;
   role: UserRole;

@@ -12,15 +12,17 @@ public class AuthService
     private readonly IMongoCollection<AppUser> _users;
     private readonly JwtService _jwtService;
     private readonly PasswordPolicyService _passwordPolicy;
-
+    private readonly RefreshTokenService _refreshTokenService;
     public AuthService(
         IMongoDatabase database,
         JwtService jwtService,
-        PasswordPolicyService passwordPolicy)
+        PasswordPolicyService passwordPolicy,
+        RefreshTokenService refreshTokenService)
     {
         _users = database.GetCollection<AppUser>("users");
         _jwtService = jwtService;
         _passwordPolicy = passwordPolicy;
+        _refreshTokenService = refreshTokenService;
     }
 
     public async Task<bool> AdminExistsAsync()
@@ -176,12 +178,29 @@ public class AuthService
 
         var token = _jwtService.GenerateToken(user);
 
+        var refreshToken = _refreshTokenService.Generate();
+        var refreshTokenHash = _refreshTokenService.Hash(refreshToken);
+
+        var newRefreshToken = new RefreshToken
+        {
+            TokenHash = refreshTokenHash,
+            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var refreshUpdate = Builders<AppUser>.Update
+            .Push(x => x.RefreshTokens, newRefreshToken)
+            .Set(x => x.UpdatedAt, DateTime.UtcNow);
+
+        await _users.UpdateOneAsync(x => x.Id == user.Id, refreshUpdate);
+
         return new LoginResponse(
             token,
+            refreshToken,
             user.Email,
             user.FullName,
             user.Role,
-            "2h"
+            "30m"
         );
     }
 
@@ -319,10 +338,17 @@ public class AuthService
 
         if (!_passwordPolicy.IsValid(request.NewPassword, out var error))
             return (false, error);
+        var now = DateTime.UtcNow;
 
+        user.RefreshTokens.ForEach(t =>
+        {
+            if (t.IsActive)
+                t.RevokedAt = now;
+        });
         var update = Builders<AppUser>.Update
             .Set(x => x.PasswordHash, BCrypt.Net.BCrypt.HashPassword(request.NewPassword))
-            .Set(x => x.UpdatedAt, DateTime.UtcNow);
+            .Set(x => x.RefreshTokens, user.RefreshTokens)
+            .Set(x => x.UpdatedAt, now);
 
         if (!ObjectId.TryParse(userId, out var objectId))
             return (false, "Utilisateur introuvable.");
@@ -330,4 +356,77 @@ public class AuthService
 
         return (true, "Mot de passe modifié avec succès.");
     }
+    public async Task<LoginResponse?> RefreshAsync(string refreshToken)
+{
+    var refreshTokenHash = _refreshTokenService.Hash(refreshToken);
+
+    var user = await _users
+        .Find(x => x.RefreshTokens.Any(t => t.TokenHash == refreshTokenHash))
+        .FirstOrDefaultAsync();
+
+    if (user is null)
+        return null;
+
+    var storedToken = user.RefreshTokens
+        .FirstOrDefault(t => t.TokenHash == refreshTokenHash);
+
+    if (storedToken is null || !storedToken.IsActive)
+        return null;
+
+    storedToken.RevokedAt = DateTime.UtcNow;
+
+    var newRefreshToken = _refreshTokenService.Generate();
+
+    user.RefreshTokens.Add(new RefreshToken
+    {
+        TokenHash = _refreshTokenService.Hash(newRefreshToken),
+        ExpiresAt = DateTime.UtcNow.AddDays(7),
+        CreatedAt = DateTime.UtcNow
+    });
+
+    await _users.UpdateOneAsync(
+        x => x.Id == user.Id,
+        Builders<AppUser>.Update
+            .Set(x => x.RefreshTokens, user.RefreshTokens)
+            .Set(x => x.UpdatedAt, DateTime.UtcNow)
+    );
+
+    var accessToken = _jwtService.GenerateToken(user);
+
+    return new LoginResponse(
+        accessToken,
+        newRefreshToken,
+        user.Email,
+        user.FullName,
+        user.Role,
+        "30m"
+    );
+}
+
+public async Task<bool> LogoutAsync(string refreshToken)
+{
+    var refreshTokenHash = _refreshTokenService.Hash(refreshToken);
+
+    var user = await _users
+        .Find(x => x.RefreshTokens.Any(t => t.TokenHash == refreshTokenHash))
+        .FirstOrDefaultAsync();
+
+    if (user is null)
+        return true;
+
+    var storedToken = user.RefreshTokens
+        .FirstOrDefault(t => t.TokenHash == refreshTokenHash);
+
+    if (storedToken is not null && storedToken.IsActive)
+        storedToken.RevokedAt = DateTime.UtcNow;
+
+    await _users.UpdateOneAsync(
+        x => x.Id == user.Id,
+        Builders<AppUser>.Update
+            .Set(x => x.RefreshTokens, user.RefreshTokens)
+            .Set(x => x.UpdatedAt, DateTime.UtcNow)
+    );
+
+    return true;
+}
 }
